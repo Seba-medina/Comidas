@@ -33,6 +33,30 @@ netlify dev
 
 Se abre en `http://localhost:8888`.
 
+## Cómo agregarla como acceso directo en el celular
+
+La página ya tiene ícono propio y modo pantalla completa configurados
+(`manifest.json` + metatags). Para instalarla:
+
+**Android (Chrome):**
+1. Abrí tu link personal (el que compartís, con `?u=tu_usuario`).
+2. Tocá el menú ⋮ (arriba a la derecha) → **"Instalar app"** o
+   **"Agregar a pantalla de inicio"**.
+3. Confirmá. Te queda un ícono como cualquier otra app, y se abre sin la
+   barra del navegador.
+
+**iPhone (Safari):**
+1. Abrí tu link personal en Safari (tiene que ser Safari, no Chrome, para
+   que aparezca la opción).
+2. Tocá el botón de Compartir (el cuadradito con la flecha hacia arriba).
+3. Elegí **"Agregar a pantalla de inicio"**.
+4. Confirmá el nombre y listo.
+
+Como tu usuario queda guardado en el navegador (`localStorage`), aunque el
+acceso directo abra la página "pelada" (sin `?u=` en la URL), va a reconocer
+tu usuario automáticamente y entrar directo a tus comidas — no hace falta
+loguearse cada vez.
+
 ## Qué se agregó en esta versión
 
 - **Usuarios por link**: al entrar por primera vez, elegís un nombre de
