@@ -132,6 +132,49 @@
       border: 1px solid #ccc;
     }
 
+    /* --- Layout: barra lateral + contenido --- */
+    .layout {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .main-col { min-width: 0; }
+
+    @media (min-width: 860px) {
+      .layout {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 22px;
+      }
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 300px;
+        flex-shrink: 0;
+        order: -1;
+      }
+      .main-col { flex: 1; }
+      .action-bar { display: none; }
+      .modal-overlay {
+        position: static !important;
+        display: block !important;
+        background: none !important;
+        padding: 0 !important;
+        inset: auto !important;
+      }
+      .modal-box {
+        max-width: none;
+        max-height: none;
+        overflow: visible;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        margin: 0;
+      }
+      .modal-close { display: none; }
+      .modal-box h3 { padding-right: 0; }
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -572,83 +615,67 @@
       <button id="btn-cambiar-usuario">Cambiar de usuario</button>
     </div>
 
-    <div class="day-nav">
-      <button id="btn-prev">‹ Día anterior</button>
-      <div>
-        <div class="fecha" id="fecha-label"></div>
-        <input type="date" id="fecha-picker">
-      </div>
-      <button id="btn-next">Día siguiente ›</button>
-    </div>
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="modal-overlay" id="modal-activity">
+          <div class="modal-box">
+            <button class="modal-close" data-close="modal-activity">&times;</button>
+            <h3>🏃 Actividad física de hoy</h3>
+            <div class="activity-list" id="activity-list"></div>
+            <div class="activity-form">
+              <input type="text" id="activity-tipo" placeholder="ej: Gym, Correr, Fútbol..." maxlength="40">
+              <input type="text" id="activity-nota" placeholder="Nota opcional (ej: 5km, 1 hora)" maxlength="300">
+            </div>
+            <div class="preset-row" style="padding:0 0 10px;">
+              <select id="activity-preset">
+                <option value="">O elegí una opción guardada…</option>
+              </select>
+            </div>
+            <div class="activity-actions">
+              <button id="btn-activity-add">➕ Agregar actividad</button>
+              <button id="btn-activity-star" title="Guardar como opción para elegir después">⭐</button>
+            </div>
+            <div class="msg" id="activity-msg"></div>
+          </div>
+        </div>
 
-    <div class="grid" id="grid"></div>
-
-    <div class="action-bar">
-      <button id="btn-open-activity">🏃 Actividad<span class="badge" id="activity-badge" style="display:none"></span></button>
-      <button id="btn-open-extra">➕ Extra</button>
-      <button id="btn-open-pdf">📄 PDF</button>
-    </div>
-
-    <!-- Modal: actividad física -->
-    <div class="modal-overlay" id="modal-activity">
-      <div class="modal-box">
-        <button class="modal-close" data-close="modal-activity">&times;</button>
-        <h3>🏃 Actividad física de hoy</h3>
-        <div class="activity-list" id="activity-list"></div>
-        <div class="activity-form">
-          <input type="text" id="activity-tipo" placeholder="ej: Gym, Correr, Fútbol..." maxlength="40">
-          <input type="text" id="activity-nota" placeholder="Nota opcional (ej: 5km, 1 hora)" maxlength="300">
+        <!-- Modal: agregar comida extra -->
+        <div class="modal-overlay" id="modal-extra">
+          <div class="modal-box">
+            <button class="modal-close" data-close="modal-extra">&times;</button>
+            <h3>➕ Agregar comida extra</h3>
+            <p>Para algo que comiste fuera de las 4 comidas principales (ej: algo
+              a media mañana). Elegí después de cuál va, una descripción
+              opcional, y la foto.</p>
+            <div class="extra-form">
+              <label>Después de
+                <select id="extra-after">
+                  <option value="desayuno">Desayuno</option>
+                  <option value="almuerzo">Almuerzo</option>
+                  <option value="merienda">Merienda</option>
+                  <option value="cena">Cena</option>
+                </select>
+              </label>
+              <label>Nombre (opcional)
+                <input type="text" id="extra-label" placeholder="ej: Media mañana" maxlength="40">
+              </label>
+            </div>
+            <label style="display:block; font-size:0.9em; margin-bottom:6px;">Descripción / ingredientes (opcional)
+              <input type="text" id="extra-desc" placeholder="ej: manzana con canela y nueces" maxlength="300"
+                style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid #ccc; margin-top:4px;">
+            </label>
+            <div class="preset-row" style="padding:0 0 14px;">
+              <select id="extra-preset">
+                <option value="">O elegí una opción guardada…</option>
+              </select>
+            </div>
+            <label id="label-extra-file" for="extra-file" class="extra-file-label">📷 Elegir foto</label>
+            <input type="file" id="extra-file" accept="image/jpeg,image/png">
+            <div class="extra-file-name" id="extra-file-name"></div>
+            <button id="btn-extra-guardar">Agregar</button>
+            <div class="msg" id="extra-msg"></div>
+          </div>
         </div>
-        <div class="preset-row" style="padding:0 0 10px;">
-          <select id="activity-preset">
-            <option value="">O elegí una opción guardada…</option>
-          </select>
-        </div>
-        <div class="activity-actions">
-          <button id="btn-activity-add">➕ Agregar actividad</button>
-          <button id="btn-activity-star" title="Guardar como opción para elegir después">⭐</button>
-        </div>
-        <div class="msg" id="activity-msg"></div>
-      </div>
-    </div>
-
-    <!-- Modal: agregar comida extra -->
-    <div class="modal-overlay" id="modal-extra">
-      <div class="modal-box">
-        <button class="modal-close" data-close="modal-extra">&times;</button>
-        <h3>➕ Agregar comida extra</h3>
-        <p>Para algo que comiste fuera de las 4 comidas principales (ej: algo
-          a media mañana). Elegí después de cuál va, una descripción
-          opcional, y la foto.</p>
-        <div class="extra-form">
-          <label>Después de
-            <select id="extra-after">
-              <option value="desayuno">Desayuno</option>
-              <option value="almuerzo">Almuerzo</option>
-              <option value="merienda">Merienda</option>
-              <option value="cena">Cena</option>
-            </select>
-          </label>
-          <label>Nombre (opcional)
-            <input type="text" id="extra-label" placeholder="ej: Media mañana" maxlength="40">
-          </label>
-        </div>
-        <label style="display:block; font-size:0.9em; margin-bottom:6px;">Descripción / ingredientes (opcional)
-          <input type="text" id="extra-desc" placeholder="ej: manzana con canela y nueces" maxlength="300"
-            style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid #ccc; margin-top:4px;">
-        </label>
-        <div class="preset-row" style="padding:0 0 14px;">
-          <select id="extra-preset">
-            <option value="">O elegí una opción guardada…</option>
-          </select>
-        </div>
-        <label id="label-extra-file" for="extra-file" class="extra-file-label">📷 Elegir foto</label>
-        <input type="file" id="extra-file" accept="image/jpeg,image/png">
-        <div class="extra-file-name" id="extra-file-name"></div>
-        <button id="btn-extra-guardar">Agregar</button>
-        <div class="msg" id="extra-msg"></div>
-      </div>
-    </div>
 
     <!-- Modal: generar PDF -->
     <div class="modal-overlay" id="modal-pdf">
@@ -667,6 +694,27 @@
         </div>
         <button id="btn-pdf">Descargar PDF</button>
         <div class="pdf-msg" id="pdf-msg"></div>
+      </div>
+    </div>
+      </aside>
+
+      <div class="main-col">
+        <div class="day-nav">
+          <button id="btn-prev">‹ Día anterior</button>
+          <div>
+            <div class="fecha" id="fecha-label"></div>
+            <input type="date" id="fecha-picker">
+          </div>
+          <button id="btn-next">Día siguiente ›</button>
+        </div>
+
+        <div class="grid" id="grid"></div>
+
+        <div class="action-bar" id="action-bar">
+          <button id="btn-open-activity">🏃 Actividad<span class="badge" id="activity-badge" style="display:none"></span></button>
+          <button id="btn-open-extra">➕ Extra</button>
+          <button id="btn-open-pdf">📄 PDF</button>
+        </div>
       </div>
     </div>
   </div>
