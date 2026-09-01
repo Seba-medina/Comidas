@@ -99,6 +99,10 @@ export default async (req) => {
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
+  // Para el resumen de actividad física al final del PDF
+  const actividadCounts = new Map(); // key: tipo en minúscula -> { label, count }
+  let diasConActividad = 0;
+
   for (let i = 0; i < diffDias; i++) {
     const fecha = addDias(fechaDesde, i);
     const fechaStr = formatFecha(fecha);
@@ -119,6 +123,26 @@ export default async (req) => {
     } catch (e) {
       descripciones = {};
     }
+    let actividades = [];
+    try {
+      const raw = await store.get(`${usuario}:${fechaStr}:actividades`, { type: "json" });
+      if (Array.isArray(raw)) actividades = raw;
+    } catch (e) {
+      actividades = [];
+    }
+
+    if (actividades.length) diasConActividad++;
+    for (const act of actividades) {
+      const tipo = (act?.tipo || "").trim();
+      if (!tipo) continue;
+      const key = tipo.toLowerCase();
+      const entry = actividadCounts.get(key) || { label: tipo, count: 0 };
+      entry.count += 1;
+      actividadCounts.set(key, entry);
+    }
+    const actividadTexto = actividades
+      .map((a) => (a.nota ? `${a.tipo} (${a.nota})` : a.tipo))
+      .join(", ");
 
     const items = [];
     for (const comida of COMIDAS) {
@@ -154,6 +178,19 @@ export default async (req) => {
         font: fontBold,
         color: rgb(0.71, 0.4, 0.11),
       });
+
+      if (p === 0 && actividadTexto) {
+        const [lineaActividad] = wrapText(`Actividad física: ${actividadTexto}`, fontRegular, 10.5, width - 80, 1);
+        if (lineaActividad) {
+          page.drawText(lineaActividad, {
+            x: 40,
+            y: height - 76,
+            size: 10.5,
+            font: fontRegular,
+            color: rgb(0.16, 0.5, 0.44),
+          });
+        }
+      }
 
       const margin = 40;
       const gap = 20;
@@ -245,6 +282,65 @@ export default async (req) => {
             color: rgb(0.6, 0.6, 0.6),
           });
         }
+      }
+    }
+  }
+
+  // Página de resumen de actividad física del rango completo
+  {
+    const pageW = 595.28;
+    const pageH = 841.89;
+    const margin = 40;
+    let page = pdfDoc.addPage([pageW, pageH]);
+    let y = pageH - 60;
+
+    page.drawText("Resumen de actividad física", {
+      x: margin,
+      y,
+      size: 20,
+      font: fontBold,
+      color: rgb(0.71, 0.4, 0.11),
+    });
+    y -= 26;
+
+    page.drawText(
+      `Del ${desde} al ${hasta} — actividad registrada en ${diasConActividad} de ${diffDias} día(s)`,
+      { x: margin, y, size: 11, font: fontRegular, color: rgb(0.4, 0.4, 0.4) }
+    );
+    y -= 34;
+
+    const filas = Array.from(actividadCounts.values()).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+
+    if (filas.length === 0) {
+      page.drawText("No se registró actividad física en este rango de fechas.", {
+        x: margin,
+        y,
+        size: 12,
+        font: fontRegular,
+        color: rgb(0.5, 0.5, 0.5),
+      });
+    } else {
+      for (const fila of filas) {
+        if (y < 60) {
+          page = pdfDoc.addPage([pageW, pageH]);
+          y = pageH - 60;
+        }
+        const veces = fila.count === 1 ? "vez" : "veces";
+        page.drawText(`${fila.label}`, {
+          x: margin,
+          y,
+          size: 13,
+          font: fontBold,
+          color: rgb(0.2, 0.2, 0.2),
+        });
+        page.drawText(`${fila.count} ${veces}`, {
+          x: pageW - margin - 90,
+          y,
+          size: 13,
+          font: fontRegular,
+          color: rgb(0.16, 0.5, 0.44),
+        });
+        y -= 24;
       }
     }
   }

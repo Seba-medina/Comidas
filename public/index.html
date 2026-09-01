@@ -377,6 +377,95 @@
     #btn-extra-guardar:hover { background: #5a89b0; }
     #btn-extra-guardar:disabled { background: #ccc; cursor: wait; }
 
+    /* --- Caja "actividad física" --- */
+    .activity-box {
+      max-width: 640px;
+      margin: 30px auto;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    .activity-box h3 {
+      margin: 0 0 14px;
+      text-align: center;
+      color: #466944;
+      font-size: 1.1em;
+    }
+    .activity-list {
+      margin-bottom: 14px;
+    }
+    .activity-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #eef5ea;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      font-size: 0.9em;
+    }
+    .activity-item .texto { color: #333; overflow-wrap: anywhere; }
+    .activity-item .texto b { color: #466944; }
+    .activity-item button {
+      background: none;
+      border: none;
+      color: #e76f51;
+      cursor: pointer;
+      font-size: 1.05em;
+      flex-shrink: 0;
+    }
+    .activity-empty {
+      font-size: 0.85em;
+      color: #999;
+      text-align: center;
+      padding: 4px 0 8px;
+    }
+    .activity-form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .activity-form input[type="text"] {
+      flex: 1;
+      min-width: 140px;
+      padding: 9px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.95em;
+      box-sizing: border-box;
+    }
+    .activity-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 4px;
+    }
+    #btn-activity-add {
+      background: #588157;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 0.95em;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #btn-activity-add:hover { background: #466944; }
+    #btn-activity-add:disabled { background: #ccc; cursor: wait; }
+    #btn-activity-star {
+      background: #6d9dc5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.95em;
+      cursor: pointer;
+    }
+    #btn-activity-star:hover { background: #5a89b0; }
+
     .pdf-box {
       max-width: 640px;
       margin: 40px auto;
@@ -481,6 +570,25 @@
 
     <div class="grid" id="grid"></div>
 
+    <div class="activity-box">
+      <h3>🏃 Actividad física de hoy</h3>
+      <div class="activity-list" id="activity-list"></div>
+      <div class="activity-form">
+        <input type="text" id="activity-tipo" placeholder="ej: Gym, Correr, Fútbol..." maxlength="40">
+        <input type="text" id="activity-nota" placeholder="Nota opcional (ej: 5km, 1 hora)" maxlength="300">
+      </div>
+      <div class="preset-row">
+        <select id="activity-preset">
+          <option value="">O elegí una opción guardada…</option>
+        </select>
+      </div>
+      <div class="activity-actions">
+        <button id="btn-activity-add">➕ Agregar actividad</button>
+        <button id="btn-activity-star" title="Guardar como opción para elegir después">⭐</button>
+      </div>
+      <div class="msg" id="activity-msg"></div>
+    </div>
+
     <div class="extra-box">
       <button id="btn-toggle-extra">➕ Agregar comida extra</button>
       <div class="extra-options" id="extra-options">
@@ -520,7 +628,8 @@
     <div class="pdf-box">
       <button id="btn-toggle-pdf">📄 Generar PDF</button>
       <div class="pdf-options" id="pdf-options">
-        <p>Elegí el rango de fechas (una hoja por día, con las 4 comidas).</p>
+        <p>Elegí el rango de fechas (una hoja por día con las comidas, y al
+          final un resumen con cuántas veces hiciste cada actividad física).</p>
         <div class="rango">
           <label class="rango-label">Desde
             <input type="date" id="pdf-desde">
@@ -594,7 +703,7 @@
       document.getElementById("app").style.display = "block";
       document.getElementById("user-label").textContent = nombre;
       renderFechaLabel();
-      cargarPresets().then(renderDia);
+      Promise.all([cargarPresets(), cargarPresetsActividad()]).then(renderDia);
     }
 
     document.getElementById("btn-entrar").addEventListener("click", () => {
@@ -656,12 +765,24 @@
     let extrasActuales = [];
     let descripcionesActuales = {};
     let presetsActuales = { desayuno: [], almuerzo: [], merienda: [], cena: [] };
+    let actividadesActuales = [];
+    let presetsActividad = [];
 
     async function cargarPresets() {
       try {
         const res = await fetch(`/api/presets?usuario=${encodeURIComponent(usuario)}`);
         const data = await res.json();
         if (data.presets) presetsActuales = data.presets;
+      } catch (e) {
+        // si falla, seguimos con lo que había
+      }
+    }
+
+    async function cargarPresetsActividad() {
+      try {
+        const res = await fetch(`/api/activity-presets?usuario=${encodeURIComponent(usuario)}`);
+        const data = await res.json();
+        if (Array.isArray(data.opciones)) presetsActividad = data.opciones;
       } catch (e) {
         // si falla, seguimos con lo que había
       }
@@ -697,19 +818,24 @@
     async function renderDia() {
       const fechaStr = toISO(currentDate);
       try {
-        const [resExtras, resDesc] = await Promise.all([
+        const [resExtras, resDesc, resAct] = await Promise.all([
           fetch(`/api/extras?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
           fetch(`/api/descriptions?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
+          fetch(`/api/activities?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
         ]);
         const dataExtras = await resExtras.json();
         const dataDesc = await resDesc.json();
+        const dataAct = await resAct.json();
         extrasActuales = Array.isArray(dataExtras.extras) ? dataExtras.extras : [];
         descripcionesActuales = dataDesc.descripciones || {};
+        actividadesActuales = Array.isArray(dataAct.actividades) ? dataAct.actividades : [];
       } catch (e) {
         extrasActuales = [];
         descripcionesActuales = {};
+        actividadesActuales = [];
       }
       buildGrid();
+      renderActividades();
     }
 
     function crearCardBase(key, nombre) {
@@ -1035,6 +1161,120 @@
       } finally {
         btnExtraGuardar.disabled = false;
         btnExtraGuardar.textContent = "Agregar";
+      }
+    });
+
+    // ---------------- Actividad física ----------------
+    function renderActividades() {
+      const list = document.getElementById("activity-list");
+      list.innerHTML = "";
+      if (!actividadesActuales.length) {
+        list.innerHTML = `<div class="activity-empty">Todavía no cargaste actividad física para este día.</div>`;
+      } else {
+        for (const act of actividadesActuales) {
+          const row = document.createElement("div");
+          row.className = "activity-item";
+          const notaTxt = act.nota ? ` — ${escapeHTML(act.nota)}` : "";
+          row.innerHTML = `<span class="texto"><b>${escapeHTML(act.tipo)}</b>${notaTxt}</span><button title="Eliminar">🗑</button>`;
+          row.querySelector("button").addEventListener("click", () => eliminarActividad(act.id));
+          list.appendChild(row);
+        }
+      }
+      actualizarSelectActivityPreset();
+    }
+
+    function actualizarSelectActivityPreset() {
+      const select = document.getElementById("activity-preset");
+      if (!select) return;
+      const opciones = presetsActividad
+        .map((t) => `<option value="${escapeAttr(t)}">${escapeHTML(t)}</option>`)
+        .join("");
+      select.innerHTML = `<option value="">O elegí una opción guardada…</option>${opciones}`;
+    }
+
+    document.getElementById("activity-preset").addEventListener("change", (e) => {
+      if (!e.target.value) return;
+      document.getElementById("activity-tipo").value = e.target.value;
+      e.target.selectedIndex = 0;
+    });
+
+    async function eliminarActividad(id) {
+      if (!confirm("¿Eliminar esta actividad?")) return;
+      try {
+        const res = await fetch("/api/activity-delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario, fecha: toISO(currentDate), id }),
+        });
+        if (!res.ok) throw new Error("No se pudo eliminar");
+        actividadesActuales = actividadesActuales.filter((a) => a.id !== id);
+        renderActividades();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    document.getElementById("btn-activity-add").addEventListener("click", async () => {
+      const tipoInput = document.getElementById("activity-tipo");
+      const notaInput = document.getElementById("activity-nota");
+      const msg = document.getElementById("activity-msg");
+      const btn = document.getElementById("btn-activity-add");
+      msg.textContent = "";
+
+      const tipo = tipoInput.value.trim();
+      if (!tipo) {
+        msg.textContent = "Escribí qué actividad hiciste (ej: Gym, Correr).";
+        return;
+      }
+
+      btn.disabled = true;
+      const textoOriginal = btn.textContent;
+      btn.textContent = "Agregando...";
+
+      try {
+        const res = await fetch("/api/activity-add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            usuario,
+            fecha: toISO(currentDate),
+            tipo,
+            nota: notaInput.value.trim(),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "No se pudo agregar la actividad");
+        actividadesActuales.push(data.actividad);
+        tipoInput.value = "";
+        notaInput.value = "";
+        renderActividades();
+      } catch (err) {
+        msg.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = textoOriginal;
+      }
+    });
+
+    document.getElementById("btn-activity-star").addEventListener("click", async () => {
+      const tipoInput = document.getElementById("activity-tipo");
+      const texto = tipoInput.value.trim();
+      if (!texto) {
+        alert("Escribí una actividad antes de guardarla como opción.");
+        return;
+      }
+      try {
+        const res = await fetch("/api/activity-presets-add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario, texto }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "No se pudo guardar la opción");
+        presetsActividad = data.opciones;
+        actualizarSelectActivityPreset();
+      } catch (err) {
+        alert(err.message);
       }
     });
 
