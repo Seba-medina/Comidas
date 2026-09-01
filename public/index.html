@@ -12,12 +12,45 @@
       padding: 20px;
       color: #333;
     }
-    h1 { text-align: center; color: #b5651d; }
+    h1 { text-align: center; color: #b5651d; margin-bottom: 5px; }
+
+    .day-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      max-width: 640px;
+      margin: 20px auto;
+      flex-wrap: wrap;
+    }
+    .day-nav button {
+      background: #f4a261;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .day-nav button:hover { background: #e08c45; }
+    .day-nav .fecha {
+      font-weight: bold;
+      font-size: 1.1em;
+      text-align: center;
+      min-width: 220px;
+      text-transform: capitalize;
+    }
+    .day-nav input[type="date"] {
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 20px;
-      max-width: 900px;
+      max-width: 640px;
       margin: 30px auto;
     }
     .card {
@@ -36,7 +69,7 @@
     }
     .img-wrap {
       width: 100%;
-      height: 220px;
+      height: 200px;
       background: #eee;
       display: flex;
       align-items: center;
@@ -57,13 +90,63 @@
       color: white;
       font-weight: bold;
       cursor: pointer;
+      font-size: 0.95em;
     }
     .card label:hover { background: #21867a; }
     .card label.loading { background: #999; cursor: wait; }
     .card input[type="file"] { display: none; }
     .msg {
+      font-size: 0.8em;
+      padding: 0 10px 10px;
+      min-height: 1em;
+      color: #e63946;
+    }
+
+    .pdf-box {
+      max-width: 640px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      text-align: center;
+    }
+    .pdf-box h3 { margin-top: 0; color: #b5651d; }
+    .pdf-box .rango {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 16px 0;
+      align-items: center;
+    }
+    .pdf-box label.rango-label {
+      font-size: 0.9em;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+    }
+    .pdf-box input[type="date"] {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .pdf-box button {
+      background: #b5651d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 1em;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .pdf-box button:hover { background: #97531a; }
+    .pdf-box button:disabled { background: #ccc; cursor: wait; }
+    .pdf-msg {
+      margin-top: 10px;
       font-size: 0.85em;
-      padding: 0 12px 10px;
       min-height: 1em;
       color: #e63946;
     }
@@ -71,7 +154,32 @@
 </head>
 <body>
   <h1>🍽️ Comidas del Día</h1>
+
+  <div class="day-nav">
+    <button id="btn-prev">‹ Día anterior</button>
+    <div>
+      <div class="fecha" id="fecha-label"></div>
+      <input type="date" id="fecha-picker">
+    </div>
+    <button id="btn-next">Día siguiente ›</button>
+  </div>
+
   <div class="grid" id="grid"></div>
+
+  <div class="pdf-box">
+    <h3>📄 Generar PDF</h3>
+    <p>Elegí el rango de fechas (una hoja por día, con las 4 comidas).</p>
+    <div class="rango">
+      <label class="rango-label">Desde
+        <input type="date" id="pdf-desde">
+      </label>
+      <label class="rango-label">Hasta
+        <input type="date" id="pdf-hasta">
+      </label>
+    </div>
+    <button id="btn-pdf">Generar PDF</button>
+    <div class="pdf-msg" id="pdf-msg"></div>
+  </div>
 
   <script>
     const COMIDAS = {
@@ -80,40 +188,65 @@
       merienda: "Merienda",
       cena: "Cena",
     };
+    const DIAS_SEMANA = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+    const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+
+    let currentDate = new Date();
+    currentDate.setHours(0,0,0,0);
 
     const grid = document.getElementById("grid");
+    const fechaLabel = document.getElementById("fecha-label");
+    const fechaPicker = document.getElementById("fecha-picker");
 
-    for (const [key, nombre] of Object.entries(COMIDAS)) {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <h2>${nombre}</h2>
-        <div class="img-wrap" id="wrap-${key}">Sin foto todavía</div>
-        <label id="label-${key}" for="input-${key}">Subir / cambiar foto</label>
-        <input type="file" id="input-${key}" accept="image/*" capture="environment">
-        <div class="msg" id="msg-${key}"></div>
-      `;
-      grid.appendChild(card);
-
-      // Al cargar, intenta mostrar la foto ya guardada
-      probarImagen(key);
-
-      document.getElementById(`input-${key}`).addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (file) subirFoto(key, file);
-      });
+    function toISO(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
     }
 
-    function probarImagen(key) {
-      const img = new Image();
-      img.onload = () => {
-        document.getElementById(`wrap-${key}`).innerHTML = "";
-        document.getElementById(`wrap-${key}`).appendChild(img);
-      };
-      img.onerror = () => {
-        // No hay foto todavía, se deja el placeholder
-      };
-      img.src = `/api/image?comida=${key}&t=${Date.now()}`;
+    function renderFechaLabel() {
+      const texto = `${DIAS_SEMANA[currentDate.getDay()]} ${currentDate.getDate()} de ${MESES[currentDate.getMonth()]} de ${currentDate.getFullYear()}`;
+      fechaLabel.textContent = texto;
+      fechaPicker.value = toISO(currentDate);
+    }
+
+    function buildCards() {
+      grid.innerHTML = "";
+      for (const [key, nombre] of Object.entries(COMIDAS)) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h2>${nombre}</h2>
+          <div class="img-wrap" id="wrap-${key}">Sin foto todavía</div>
+          <label id="label-${key}" for="input-${key}">Subir / cambiar foto</label>
+          <input type="file" id="input-${key}" accept="image/jpeg,image/png" capture="environment">
+          <div class="msg" id="msg-${key}"></div>
+        `;
+        grid.appendChild(card);
+
+        document.getElementById(`input-${key}`).addEventListener("change", (e) => {
+          const file = e.target.files[0];
+          if (file) subirFoto(key, file);
+          e.target.value = "";
+        });
+      }
+      cargarFotosDelDia();
+    }
+
+    function cargarFotosDelDia() {
+      const fechaStr = toISO(currentDate);
+      for (const key of Object.keys(COMIDAS)) {
+        const wrap = document.getElementById(`wrap-${key}`);
+        wrap.innerHTML = "Sin foto todavía";
+        const img = new Image();
+        img.onload = () => {
+          wrap.innerHTML = "";
+          wrap.appendChild(img);
+        };
+        img.onerror = () => {};
+        img.src = `/api/image?comida=${key}&fecha=${fechaStr}&t=${Date.now()}`;
+      }
     }
 
     async function subirFoto(key, file) {
@@ -125,13 +258,14 @@
 
       const formData = new FormData();
       formData.append("comida", key);
+      formData.append("fecha", toISO(currentDate));
       formData.append("foto", file);
 
       try {
         const res = await fetch("/api/upload", { method: "POST", body: formData });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Error al subir");
-        probarImagen(key);
+        cargarFotosDelDia();
       } catch (err) {
         msg.textContent = err.message;
       } finally {
@@ -139,6 +273,74 @@
         label.textContent = "Subir / cambiar foto";
       }
     }
+
+    document.getElementById("btn-prev").addEventListener("click", () => {
+      currentDate.setDate(currentDate.getDate() - 1);
+      renderFechaLabel();
+      cargarFotosDelDia();
+    });
+    document.getElementById("btn-next").addEventListener("click", () => {
+      currentDate.setDate(currentDate.getDate() + 1);
+      renderFechaLabel();
+      cargarFotosDelDia();
+    });
+    fechaPicker.addEventListener("change", () => {
+      if (!fechaPicker.value) return;
+      const [y, m, d] = fechaPicker.value.split("-").map(Number);
+      currentDate = new Date(y, m - 1, d);
+      renderFechaLabel();
+      cargarFotosDelDia();
+    });
+
+    // --- Generar PDF ---
+    const pdfDesde = document.getElementById("pdf-desde");
+    const pdfHasta = document.getElementById("pdf-hasta");
+    const btnPdf = document.getElementById("btn-pdf");
+    const pdfMsg = document.getElementById("pdf-msg");
+
+    pdfDesde.value = toISO(currentDate);
+    pdfHasta.value = toISO(currentDate);
+
+    btnPdf.addEventListener("click", async () => {
+      pdfMsg.textContent = "";
+      pdfMsg.style.color = "#e63946";
+
+      if (!pdfDesde.value || !pdfHasta.value) {
+        pdfMsg.textContent = "Elegí ambas fechas.";
+        return;
+      }
+      if (pdfDesde.value > pdfHasta.value) {
+        pdfMsg.textContent = "La fecha 'desde' tiene que ser anterior a 'hasta'.";
+        return;
+      }
+
+      btnPdf.disabled = true;
+      btnPdf.textContent = "Generando...";
+
+      try {
+        const url = `/api/generate-pdf?desde=${pdfDesde.value}&hasta=${pdfHasta.value}`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          const texto = await res.text();
+          throw new Error(texto || "No se pudo generar el PDF");
+        }
+        const blob = await res.blob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `comidas_${pdfDesde.value}_a_${pdfHasta.value}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      } catch (err) {
+        pdfMsg.textContent = err.message;
+      } finally {
+        btnPdf.disabled = false;
+        btnPdf.textContent = "Generar PDF";
+      }
+    });
+
+    renderFechaLabel();
+    buildCards();
   </script>
 </body>
 </html>
