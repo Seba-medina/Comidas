@@ -14,6 +14,79 @@
     }
     h1 { text-align: center; color: #b5651d; margin-bottom: 5px; }
 
+    /* --- Pantalla de usuario --- */
+    .login-screen {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-box {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      padding: 30px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-sizing: border-box;
+    }
+    .login-box p { color: #555; font-size: 0.95em; }
+    .login-box input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 1.1em;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      margin: 14px 0 6px;
+      text-align: center;
+    }
+    .login-box button {
+      background: #2a9d8f;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .login-box button:hover { background: #21867a; }
+    .login-msg {
+      color: #e63946;
+      font-size: 0.85em;
+      min-height: 1.2em;
+      margin-top: 8px;
+    }
+
+    /* --- Barra de usuario --- */
+    .user-bar {
+      max-width: 900px;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 0.9em;
+      color: #555;
+    }
+    .user-bar b { color: #b5651d; }
+    .user-bar button {
+      background: none;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      padding: 5px 14px;
+      cursor: pointer;
+      font-size: 0.9em;
+      color: #444;
+    }
+    .user-bar button:hover { background: #eee; }
+    .user-bar .copiado { color: #2a9d8f; font-weight: bold; }
+
     .day-nav {
       display: flex;
       align-items: center;
@@ -87,7 +160,6 @@
       background: #222;
     }
 
-    /* Lightbox para ver la foto en grande */
     .lightbox {
       display: none;
       position: fixed;
@@ -206,33 +278,55 @@
   </style>
 </head>
 <body>
-  <h1>🍽️ Comidas del Día</h1>
 
-  <div class="day-nav">
-    <button id="btn-prev">‹ Día anterior</button>
-    <div>
-      <div class="fecha" id="fecha-label"></div>
-      <input type="date" id="fecha-picker">
+  <!-- Pantalla para ingresar el usuario -->
+  <div class="login-screen" id="pantalla-usuario">
+    <div class="login-box">
+      <h1 style="margin-top:0">🍽️ Comidas del Día</h1>
+      <p>Elegí un nombre de usuario. Va a quedar guardado en este link para
+        que solo vos (y quien compartas el link) vean estas fotos.</p>
+      <input type="text" id="input-usuario" placeholder="ej: martin83" maxlength="30" autocomplete="off">
+      <button id="btn-entrar">Entrar</button>
+      <div class="login-msg" id="login-msg"></div>
     </div>
-    <button id="btn-next">Día siguiente ›</button>
   </div>
 
-  <div class="grid" id="grid"></div>
+  <!-- App principal (oculta hasta tener usuario) -->
+  <div id="app" style="display:none">
+    <h1>🍽️ Comidas del Día</h1>
 
-  <div class="pdf-box">
-    <button id="btn-toggle-pdf">📄 Generar PDF</button>
-    <div class="pdf-options" id="pdf-options">
-      <p>Elegí el rango de fechas (una hoja por día, con las 4 comidas).</p>
-      <div class="rango">
-        <label class="rango-label">Desde
-          <input type="date" id="pdf-desde">
-        </label>
-        <label class="rango-label">Hasta
-          <input type="date" id="pdf-hasta">
-        </label>
+    <div class="user-bar">
+      Usuario: <b id="user-label"></b>
+      <button id="btn-compartir">🔗 Compartir mi link</button>
+      <button id="btn-cambiar-usuario">Cambiar de usuario</button>
+    </div>
+
+    <div class="day-nav">
+      <button id="btn-prev">‹ Día anterior</button>
+      <div>
+        <div class="fecha" id="fecha-label"></div>
+        <input type="date" id="fecha-picker">
       </div>
-      <button id="btn-pdf">Descargar PDF</button>
-      <div class="pdf-msg" id="pdf-msg"></div>
+      <button id="btn-next">Día siguiente ›</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="pdf-box">
+      <button id="btn-toggle-pdf">📄 Generar PDF</button>
+      <div class="pdf-options" id="pdf-options">
+        <p>Elegí el rango de fechas (una hoja por día, con las 4 comidas).</p>
+        <div class="rango">
+          <label class="rango-label">Desde
+            <input type="date" id="pdf-desde">
+          </label>
+          <label class="rango-label">Hasta
+            <input type="date" id="pdf-hasta">
+          </label>
+        </div>
+        <button id="btn-pdf">Descargar PDF</button>
+        <div class="pdf-msg" id="pdf-msg"></div>
+      </div>
     </div>
   </div>
 
@@ -250,10 +344,92 @@
     };
     const DIAS_SEMANA = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
     const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    const USUARIO_REGEX = /^[a-zA-Z0-9_-]{3,30}$/;
 
+    let usuario = null;
     let currentDate = new Date();
     currentDate.setHours(0,0,0,0);
 
+    // ---------------- Usuario ----------------
+    function usuarioDesdeURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("u");
+    }
+
+    function iniciar() {
+      const urlUser = usuarioDesdeURL();
+      if (urlUser && USUARIO_REGEX.test(urlUser)) {
+        entrarComoUsuario(urlUser, false);
+        return;
+      }
+      const guardado = localStorage.getItem("comidas_usuario");
+      if (guardado && USUARIO_REGEX.test(guardado)) {
+        entrarComoUsuario(guardado, true);
+        return;
+      }
+      mostrarPantallaLogin();
+    }
+
+    function mostrarPantallaLogin(mensaje) {
+      document.getElementById("pantalla-usuario").style.display = "flex";
+      document.getElementById("app").style.display = "none";
+      const msg = document.getElementById("login-msg");
+      msg.textContent = mensaje || "";
+    }
+
+    function entrarComoUsuario(nombre, actualizarURL) {
+      usuario = nombre;
+      localStorage.setItem("comidas_usuario", nombre);
+      if (actualizarURL) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("u", nombre);
+        window.history.replaceState({}, "", url);
+      }
+      document.getElementById("pantalla-usuario").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      document.getElementById("user-label").textContent = nombre;
+      renderFechaLabel();
+      buildCards();
+    }
+
+    document.getElementById("btn-entrar").addEventListener("click", () => {
+      const valor = document.getElementById("input-usuario").value.trim();
+      if (!USUARIO_REGEX.test(valor)) {
+        document.getElementById("login-msg").textContent =
+          "Usá entre 3 y 30 caracteres: letras, números, guiones o guión bajo.";
+        return;
+      }
+      entrarComoUsuario(valor, true);
+    });
+    document.getElementById("input-usuario").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("btn-entrar").click();
+    });
+
+    document.getElementById("btn-cambiar-usuario").addEventListener("click", () => {
+      localStorage.removeItem("comidas_usuario");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("u");
+      window.history.replaceState({}, "", url);
+      document.getElementById("input-usuario").value = "";
+      mostrarPantallaLogin();
+    });
+
+    document.getElementById("btn-compartir").addEventListener("click", async () => {
+      const url = new URL(window.location.href);
+      url.searchParams.set("u", usuario);
+      const enlace = url.toString();
+      const btn = document.getElementById("btn-compartir");
+      try {
+        await navigator.clipboard.writeText(enlace);
+        const original = btn.textContent;
+        btn.textContent = "✅ Link copiado";
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      } catch (e) {
+        prompt("Copiá este link:", enlace);
+      }
+    });
+
+    // ---------------- Fecha ----------------
     const grid = document.getElementById("grid");
     const fechaLabel = document.getElementById("fecha-label");
     const fechaPicker = document.getElementById("fecha-picker");
@@ -271,6 +447,7 @@
       fechaPicker.value = toISO(currentDate);
     }
 
+    // ---------------- Comidas ----------------
     function buildCards() {
       grid.innerHTML = "";
       for (const [key, nombre] of Object.entries(COMIDAS)) {
@@ -306,11 +483,11 @@
           wrap.appendChild(img);
         };
         img.onerror = () => {};
-        img.src = `/api/image?comida=${key}&fecha=${fechaStr}&t=${Date.now()}`;
+        img.src = `/api/image?usuario=${encodeURIComponent(usuario)}&comida=${key}&fecha=${fechaStr}&t=${Date.now()}`;
       }
     }
 
-    // --- Lightbox (ver foto en grande) ---
+    // ---------------- Lightbox ----------------
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightbox-img");
     document.getElementById("lightbox-close").addEventListener("click", cerrarLightbox);
@@ -338,6 +515,7 @@
       label.textContent = "Subiendo...";
 
       const formData = new FormData();
+      formData.append("usuario", usuario);
       formData.append("comida", key);
       formData.append("fecha", toISO(currentDate));
       formData.append("foto", file);
@@ -373,7 +551,7 @@
       cargarFotosDelDia();
     });
 
-    // --- Generar PDF ---
+    // ---------------- Generar PDF ----------------
     const pdfDesde = document.getElementById("pdf-desde");
     const pdfHasta = document.getElementById("pdf-hasta");
     const btnPdf = document.getElementById("btn-pdf");
@@ -405,7 +583,7 @@
       btnPdf.textContent = "Generando...";
 
       try {
-        const url = `/api/generate-pdf?desde=${pdfDesde.value}&hasta=${pdfHasta.value}`;
+        const url = `/api/generate-pdf?usuario=${encodeURIComponent(usuario)}&desde=${pdfDesde.value}&hasta=${pdfHasta.value}`;
         const res = await fetch(url);
         if (!res.ok) {
           const texto = await res.text();
@@ -414,7 +592,7 @@
         const blob = await res.blob();
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = `comidas_${pdfDesde.value}_a_${pdfHasta.value}.pdf`;
+        link.download = `comidas_${usuario}_${pdfDesde.value}_a_${pdfHasta.value}.pdf`;
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -422,12 +600,11 @@
         pdfMsg.textContent = err.message;
       } finally {
         btnPdf.disabled = false;
-        btnPdf.textContent = "Generar PDF";
+        btnPdf.textContent = "Descargar PDF";
       }
     });
 
-    renderFechaLabel();
-    buildCards();
+    iniciar();
   </script>
 </body>
 </html>

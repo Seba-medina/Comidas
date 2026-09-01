@@ -35,16 +35,29 @@ Se abre en `http://localhost:8888`.
 
 ## Qué se agregó en esta versión
 
+- **Usuarios por link**: al entrar por primera vez, elegís un nombre de
+  usuario (ej: `martin83`). A partir de ahí el link queda así:
+  `https://tu-sitio.netlify.app/?u=martin83`. Compartiendo ESE link (con tu
+  botón "🔗 Compartir mi link"), la otra persona ve únicamente tus fotos.
+  Si alguien más entra sin usuario, o con otro nombre, ve un espacio
+  totalmente separado del tuyo.
+  - ⚠️ Esto separa los datos por nombre de usuario, pero **no es una
+    contraseña real**: es como un link "no listado". Cualquiera que conozca
+    o adivine tu nombre de usuario podría verlo escribiéndolo en la URL.
+    Para uso entre amigos/familia y tu nutricionista alcanza, pero elegí un
+    nombre no obvio si te preocupa la privacidad.
+  - El navegador recuerda tu usuario (con `localStorage`), así que no hace
+    falta reescribirlo cada vez que entrás desde tu propio celu/PC. Podés
+    cambiar de usuario con el botón "Cambiar de usuario".
 - **Navegación por día**: flechas "Día anterior / Día siguiente" y un
   selector de fecha. Cada foto queda guardada asociada a esa fecha
-  específica, así que podés cargar comidas de hoy, de ayer, o de cualquier
-  día.
-- **Grilla 2x2**: las 4 tarjetas de comida se acomodan siempre en 2 columnas
-  x 2 filas.
-- **Generar PDF**: al final de la página hay un selector "Desde" / "Hasta".
-  Al tocar "Generar PDF" se descarga un PDF con una hoja por cada día del
-  rango, mostrando las 4 fotos de ese día (o "Sin foto" si algún día no tiene
-  alguna comida cargada).
+  específica.
+- **Grilla 2x2 con fotos más grandes**, en proporción 4:3 (la que suelen
+  sacar los celulares), y se pueden tocar para verlas en pantalla completa.
+- **Generar PDF**: botón "📄 Generar PDF" que despliega un selector de rango
+  "Desde" / "Hasta". Genera un PDF con una hoja por cada día del rango,
+  mostrando las 4 fotos correspondientes (o "Sin foto" si algún día quedó
+  incompleto).
 
 ### Límites a tener en cuenta
 

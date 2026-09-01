@@ -9,6 +9,7 @@ const COMIDAS = [
 ];
 
 const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const USUARIO_REGEX = /^[a-zA-Z0-9_-]{3,30}$/;
 const MAX_DIAS = 62; // tope para evitar que la función tarde demasiado
 
 const DIAS_SEMANA = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
@@ -32,9 +33,13 @@ function addDias(date, dias) {
 
 export default async (req) => {
   const url = new URL(req.url);
+  const usuario = url.searchParams.get("usuario");
   const desde = url.searchParams.get("desde");
   const hasta = url.searchParams.get("hasta");
 
+  if (!usuario || !USUARIO_REGEX.test(usuario)) {
+    return new Response("Usuario inválido", { status: 400 });
+  }
   if (!desde || !hasta || !FECHA_REGEX.test(desde) || !FECHA_REGEX.test(hasta)) {
     return new Response("Faltan o son inválidos los parámetros 'desde' y 'hasta' (formato YYYY-MM-DD)", { status: 400 });
   }
@@ -106,7 +111,7 @@ export default async (req) => {
         borderWidth: 1,
       });
 
-      const entry = await store.getWithMetadata(`${fechaStr}:${key}`, { type: "arrayBuffer" });
+      const entry = await store.getWithMetadata(`${usuario}:${fechaStr}:${key}`, { type: "arrayBuffer" });
 
       if (entry) {
         try {

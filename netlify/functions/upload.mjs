@@ -2,6 +2,7 @@ import { getStore } from "@netlify/blobs";
 
 const COMIDAS_VALIDAS = ["desayuno", "almuerzo", "merienda", "cena"];
 const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const USUARIO_REGEX = /^[a-zA-Z0-9_-]{3,30}$/;
 
 export default async (req) => {
   if (req.method !== "POST") {
@@ -10,10 +11,17 @@ export default async (req) => {
 
   try {
     const formData = await req.formData();
+    const usuario = formData.get("usuario");
     const comida = formData.get("comida");
     const fecha = formData.get("fecha");
     const file = formData.get("foto");
 
+    if (!usuario || !USUARIO_REGEX.test(usuario)) {
+      return new Response(JSON.stringify({ error: "Usuario inválido" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     if (!COMIDAS_VALIDAS.includes(comida)) {
       return new Response(JSON.stringify({ error: "Comida inválida" }), {
         status: 400,
@@ -41,7 +49,7 @@ export default async (req) => {
 
     const buffer = await file.arrayBuffer();
     const store = getStore("comidas");
-    const key = `${fecha}:${comida}`;
+    const key = `${usuario}:${fecha}:${comida}`;
     await store.set(key, buffer, {
       metadata: { contentType: file.type },
     });
