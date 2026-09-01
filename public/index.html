@@ -221,6 +221,118 @@
       color: #e63946;
     }
 
+    /* --- Tarjetas de comida extra --- */
+    .extra-card h2 {
+      background: #6d9dc5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .extra-tag {
+      font-size: 0.7em;
+      font-weight: normal;
+      background: rgba(255,255,255,0.25);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .btn-eliminar-extra {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: #e76f51;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .btn-eliminar-extra:hover { background: #d15c3e; }
+
+    /* --- Caja "agregar comida extra" --- */
+    .extra-box {
+      max-width: 640px;
+      margin: 30px auto;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      text-align: center;
+    }
+    #btn-toggle-extra {
+      background: #6d9dc5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 28px;
+      font-size: 1.05em;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+    }
+    #btn-toggle-extra:hover { background: #5a89b0; }
+    .extra-options {
+      display: none;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+      text-align: left;
+    }
+    .extra-options.open { display: block; }
+    .extra-options p { margin-top: 0; font-size: 0.9em; color: #555; }
+    .extra-form {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .extra-form label {
+      flex: 1;
+      min-width: 160px;
+      font-size: 0.9em;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .extra-form select,
+    .extra-form input[type="text"] {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    .extra-box input[type="file"] { display: none; }
+    .extra-file-label {
+      display: inline-block;
+      background: #eee;
+      color: #333;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .extra-file-label:hover { background: #e2e2e2; }
+    .extra-file-name {
+      font-size: 0.85em;
+      color: #555;
+      margin: 8px 0;
+      word-break: break-all;
+    }
+    #btn-extra-guardar {
+      background: #6d9dc5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 1em;
+      cursor: pointer;
+      font-weight: bold;
+      display: block;
+      margin: 10px auto 0;
+    }
+    #btn-extra-guardar:hover { background: #5a89b0; }
+    #btn-extra-guardar:disabled { background: #ccc; cursor: wait; }
+
     .pdf-box {
       max-width: 640px;
       margin: 40px auto;
@@ -325,6 +437,33 @@
 
     <div class="grid" id="grid"></div>
 
+    <div class="extra-box">
+      <button id="btn-toggle-extra">➕ Agregar comida extra</button>
+      <div class="extra-options" id="extra-options">
+        <p>Para algo que comiste fuera de las 4 comidas principales (ej: algo
+          a media mañana). Elegí después de cuál va, una descripción
+          opcional, y la foto.</p>
+        <div class="extra-form">
+          <label>Después de
+            <select id="extra-after">
+              <option value="desayuno">Desayuno</option>
+              <option value="almuerzo">Almuerzo</option>
+              <option value="merienda">Merienda</option>
+              <option value="cena">Cena</option>
+            </select>
+          </label>
+          <label>Descripción (opcional)
+            <input type="text" id="extra-label" placeholder="ej: Media mañana" maxlength="40">
+          </label>
+        </div>
+        <label id="label-extra-file" for="extra-file" class="extra-file-label">📷 Elegir foto</label>
+        <input type="file" id="extra-file" accept="image/jpeg,image/png">
+        <div class="extra-file-name" id="extra-file-name"></div>
+        <button id="btn-extra-guardar">Agregar</button>
+        <div class="msg" id="extra-msg"></div>
+      </div>
+    </div>
+
     <div class="pdf-box">
       <button id="btn-toggle-pdf">📄 Generar PDF</button>
       <div class="pdf-options" id="pdf-options">
@@ -402,7 +541,7 @@
       document.getElementById("app").style.display = "block";
       document.getElementById("user-label").textContent = nombre;
       renderFechaLabel();
-      buildCards();
+      renderDia();
     }
 
     document.getElementById("btn-entrar").addEventListener("click", () => {
@@ -460,34 +599,76 @@
       fechaPicker.value = toISO(currentDate);
     }
 
-    // ---------------- Comidas ----------------
-    function buildCards() {
-      grid.innerHTML = "";
-      for (const [key, nombre] of Object.entries(COMIDAS)) {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <h2>${nombre}</h2>
-          <div class="img-wrap" id="wrap-${key}">Sin foto todavía</div>
-          <label id="label-${key}" for="input-${key}">Subir / cambiar foto</label>
-          <input type="file" id="input-${key}" accept="image/jpeg,image/png">
-          <div class="msg" id="msg-${key}"></div>
-        `;
-        grid.appendChild(card);
+    // ---------------- Comidas (con extras intercaladas) ----------------
+    let extrasActuales = [];
 
-        document.getElementById(`input-${key}`).addEventListener("change", (e) => {
-          const file = e.target.files[0];
-          if (file) subirFoto(key, file);
-          e.target.value = "";
-        });
+    async function renderDia() {
+      const fechaStr = toISO(currentDate);
+      try {
+        const res = await fetch(`/api/extras?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`);
+        const data = await res.json();
+        extrasActuales = Array.isArray(data.extras) ? data.extras : [];
+      } catch (e) {
+        extrasActuales = [];
       }
-      cargarFotosDelDia();
+      buildGrid();
     }
 
-    function cargarFotosDelDia() {
+    function crearCardBase(key, nombre) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <h2>${nombre}</h2>
+        <div class="img-wrap" id="wrap-${key}">Sin foto todavía</div>
+        <label id="label-${key}" for="input-${key}">Subir / cambiar foto</label>
+        <input type="file" id="input-${key}" accept="image/jpeg,image/png">
+        <div class="msg" id="msg-${key}"></div>
+      `;
+      card.querySelector(`#input-${key}`).addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) subirFoto(key, file);
+        e.target.value = "";
+      });
+      return card;
+    }
+
+    function escapeHTML(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function crearCardExtra(extra) {
+      const card = document.createElement("div");
+      card.className = "card extra-card";
+      const nombre = extra.label ? extra.label : "Comida extra";
+      card.innerHTML = `
+        <h2>${escapeHTML(nombre)}<span class="extra-tag">extra</span></h2>
+        <div class="img-wrap" id="wrap-extra-${extra.id}">Cargando...</div>
+        <button class="btn-eliminar-extra">🗑 Eliminar</button>
+      `;
+      card.querySelector(".btn-eliminar-extra").addEventListener("click", () => eliminarExtra(extra.id));
+      return card;
+    }
+
+    function buildGrid() {
+      grid.innerHTML = "";
+      for (const [key, nombre] of Object.entries(COMIDAS)) {
+        grid.appendChild(crearCardBase(key, nombre));
+        const extrasDeEsta = extrasActuales.filter((e) => e.after === key);
+        for (const extra of extrasDeEsta) {
+          grid.appendChild(crearCardExtra(extra));
+        }
+      }
+      cargarImagenes();
+    }
+
+    function cargarImagenes() {
       const fechaStr = toISO(currentDate);
+
       for (const key of Object.keys(COMIDAS)) {
         const wrap = document.getElementById(`wrap-${key}`);
+        if (!wrap) continue;
         wrap.innerHTML = "Sin foto todavía";
         const img = new Image();
         img.onload = () => {
@@ -497,6 +678,34 @@
         };
         img.onerror = () => {};
         img.src = `/api/image?usuario=${encodeURIComponent(usuario)}&comida=${key}&fecha=${fechaStr}&t=${Date.now()}`;
+      }
+
+      for (const extra of extrasActuales) {
+        const wrap = document.getElementById(`wrap-extra-${extra.id}`);
+        if (!wrap) continue;
+        const img = new Image();
+        img.onload = () => {
+          wrap.innerHTML = "";
+          img.addEventListener("click", () => abrirLightbox(img.src));
+          wrap.appendChild(img);
+        };
+        img.onerror = () => { wrap.textContent = "Error al cargar"; };
+        img.src = `/api/extra-image?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}&id=${extra.id}&t=${Date.now()}`;
+      }
+    }
+
+    async function eliminarExtra(id) {
+      if (!confirm("¿Eliminar esta foto extra?")) return;
+      try {
+        const res = await fetch("/api/extra-delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario, fecha: toISO(currentDate), id }),
+        });
+        if (!res.ok) throw new Error("No se pudo eliminar");
+        renderDia();
+      } catch (err) {
+        alert(err.message);
       }
     }
 
@@ -537,7 +746,7 @@
         const res = await fetch("/api/upload", { method: "POST", body: formData });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Error al subir");
-        cargarFotosDelDia();
+        renderDia();
       } catch (err) {
         msg.textContent = err.message;
       } finally {
@@ -549,19 +758,73 @@
     document.getElementById("btn-prev").addEventListener("click", () => {
       currentDate.setDate(currentDate.getDate() - 1);
       renderFechaLabel();
-      cargarFotosDelDia();
+      renderDia();
     });
     document.getElementById("btn-next").addEventListener("click", () => {
       currentDate.setDate(currentDate.getDate() + 1);
       renderFechaLabel();
-      cargarFotosDelDia();
+      renderDia();
     });
     fechaPicker.addEventListener("change", () => {
       if (!fechaPicker.value) return;
       const [y, m, d] = fechaPicker.value.split("-").map(Number);
       currentDate = new Date(y, m - 1, d);
       renderFechaLabel();
-      cargarFotosDelDia();
+      renderDia();
+    });
+
+    // ---------------- Agregar comida extra ----------------
+    const btnToggleExtra = document.getElementById("btn-toggle-extra");
+    const extraOptions = document.getElementById("extra-options");
+    const extraAfter = document.getElementById("extra-after");
+    const extraLabelInput = document.getElementById("extra-label");
+    const extraFileInput = document.getElementById("extra-file");
+    const extraFileName = document.getElementById("extra-file-name");
+    const btnExtraGuardar = document.getElementById("btn-extra-guardar");
+    const extraMsg = document.getElementById("extra-msg");
+
+    btnToggleExtra.addEventListener("click", () => {
+      extraOptions.classList.toggle("open");
+    });
+
+    extraFileInput.addEventListener("change", () => {
+      const file = extraFileInput.files[0];
+      extraFileName.textContent = file ? file.name : "";
+    });
+
+    btnExtraGuardar.addEventListener("click", async () => {
+      extraMsg.textContent = "";
+      const file = extraFileInput.files[0];
+      if (!file) {
+        extraMsg.textContent = "Elegí una foto.";
+        return;
+      }
+
+      btnExtraGuardar.disabled = true;
+      btnExtraGuardar.textContent = "Agregando...";
+
+      const formData = new FormData();
+      formData.append("usuario", usuario);
+      formData.append("fecha", toISO(currentDate));
+      formData.append("after", extraAfter.value);
+      formData.append("label", extraLabelInput.value.trim());
+      formData.append("foto", file);
+
+      try {
+        const res = await fetch("/api/extra-upload", { method: "POST", body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "No se pudo agregar");
+        extraLabelInput.value = "";
+        extraFileInput.value = "";
+        extraFileName.textContent = "";
+        extraOptions.classList.remove("open");
+        renderDia();
+      } catch (err) {
+        extraMsg.textContent = err.message;
+      } finally {
+        btnExtraGuardar.disabled = false;
+        btnExtraGuardar.textContent = "Agregar";
+      }
     });
 
     // ---------------- Generar PDF ----------------

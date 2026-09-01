@@ -78,6 +78,12 @@ loguearse cada vez.
   específica.
 - **Grilla 2x2 con fotos más grandes**, en proporción 4:3 (la que suelen
   sacar los celulares), y se pueden tocar para verlas en pantalla completa.
+- **Comidas extra**: si comiste algo fuera de las 4 comidas principales (ej:
+  algo a media mañana), tocá "➕ Agregar comida extra", elegí después de cuál
+  va (Desayuno, Almuerzo, Merienda o Cena), poné una descripción opcional
+  (ej: "Media mañana") y subí la foto. Aparece intercalada en el lugar
+  correcto de la grilla, y también en el PDF. Se puede eliminar con el botón
+  "🗑 Eliminar" de esa tarjeta.
 - **Generar PDF**: botón "📄 Generar PDF" que despliega un selector de rango
   "Desde" / "Hasta". Genera un PDF con una hoja por cada día del rango,
   mostrando las 4 fotos correspondientes (o "Sin foto" si algún día quedó
