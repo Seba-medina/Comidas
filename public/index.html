@@ -49,8 +49,8 @@
     .grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      max-width: 640px;
+      gap: 24px;
+      max-width: 900px;
       margin: 30px auto;
     }
     .card {
@@ -65,23 +65,57 @@
       padding: 14px;
       background: #f4a261;
       color: white;
-      font-size: 1.1em;
+      font-size: 1.2em;
     }
     .img-wrap {
       width: 100%;
-      height: 200px;
+      aspect-ratio: 4 / 3;
       background: #eee;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #999;
       overflow: hidden;
+      cursor: default;
     }
     .img-wrap img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       display: block;
+      cursor: zoom-in;
+      background: #222;
+    }
+
+    /* Lightbox para ver la foto en grande */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      color: white;
+      font-size: 2.2em;
+      cursor: pointer;
+      line-height: 1;
+      background: none;
+      border: none;
     }
     .card label {
       display: block;
@@ -111,8 +145,27 @@
       padding: 20px;
       text-align: center;
     }
-    .pdf-box h3 { margin-top: 0; color: #b5651d; }
-    .pdf-box .rango {
+    #btn-toggle-pdf {
+      background: #b5651d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 28px;
+      font-size: 1.05em;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+    }
+    #btn-toggle-pdf:hover { background: #97531a; }
+    .pdf-options {
+      display: none;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+    .pdf-options.open { display: block; }
+    .pdf-options p { margin-top: 0; }
+    .pdf-options .rango {
       display: flex;
       gap: 14px;
       justify-content: center;
@@ -120,20 +173,20 @@
       margin: 16px 0;
       align-items: center;
     }
-    .pdf-box label.rango-label {
+    .pdf-options label.rango-label {
       font-size: 0.9em;
       display: flex;
       flex-direction: column;
       gap: 4px;
       text-align: left;
     }
-    .pdf-box input[type="date"] {
+    .pdf-options input[type="date"] {
       padding: 8px;
       border-radius: 6px;
       border: 1px solid #ccc;
     }
-    .pdf-box button {
-      background: #b5651d;
+    #btn-pdf {
+      background: #2a9d8f;
       color: white;
       border: none;
       border-radius: 8px;
@@ -142,8 +195,8 @@
       cursor: pointer;
       font-weight: bold;
     }
-    .pdf-box button:hover { background: #97531a; }
-    .pdf-box button:disabled { background: #ccc; cursor: wait; }
+    #btn-pdf:hover { background: #21867a; }
+    #btn-pdf:disabled { background: #ccc; cursor: wait; }
     .pdf-msg {
       margin-top: 10px;
       font-size: 0.85em;
@@ -167,18 +220,25 @@
   <div class="grid" id="grid"></div>
 
   <div class="pdf-box">
-    <h3>📄 Generar PDF</h3>
-    <p>Elegí el rango de fechas (una hoja por día, con las 4 comidas).</p>
-    <div class="rango">
-      <label class="rango-label">Desde
-        <input type="date" id="pdf-desde">
-      </label>
-      <label class="rango-label">Hasta
-        <input type="date" id="pdf-hasta">
-      </label>
+    <button id="btn-toggle-pdf">📄 Generar PDF</button>
+    <div class="pdf-options" id="pdf-options">
+      <p>Elegí el rango de fechas (una hoja por día, con las 4 comidas).</p>
+      <div class="rango">
+        <label class="rango-label">Desde
+          <input type="date" id="pdf-desde">
+        </label>
+        <label class="rango-label">Hasta
+          <input type="date" id="pdf-hasta">
+        </label>
+      </div>
+      <button id="btn-pdf">Descargar PDF</button>
+      <div class="pdf-msg" id="pdf-msg"></div>
     </div>
-    <button id="btn-pdf">Generar PDF</button>
-    <div class="pdf-msg" id="pdf-msg"></div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightbox-close">&times;</button>
+    <img id="lightbox-img" src="" alt="Foto ampliada">
   </div>
 
   <script>
@@ -220,7 +280,7 @@
           <h2>${nombre}</h2>
           <div class="img-wrap" id="wrap-${key}">Sin foto todavía</div>
           <label id="label-${key}" for="input-${key}">Subir / cambiar foto</label>
-          <input type="file" id="input-${key}" accept="image/jpeg,image/png" capture="environment">
+          <input type="file" id="input-${key}" accept="image/jpeg,image/png">
           <div class="msg" id="msg-${key}"></div>
         `;
         grid.appendChild(card);
@@ -242,11 +302,32 @@
         const img = new Image();
         img.onload = () => {
           wrap.innerHTML = "";
+          img.addEventListener("click", () => abrirLightbox(img.src));
           wrap.appendChild(img);
         };
         img.onerror = () => {};
         img.src = `/api/image?comida=${key}&fecha=${fechaStr}&t=${Date.now()}`;
       }
+    }
+
+    // --- Lightbox (ver foto en grande) ---
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightbox-img");
+    document.getElementById("lightbox-close").addEventListener("click", cerrarLightbox);
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) cerrarLightbox();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") cerrarLightbox();
+    });
+
+    function abrirLightbox(src) {
+      lightboxImg.src = src;
+      lightbox.classList.add("open");
+    }
+    function cerrarLightbox() {
+      lightbox.classList.remove("open");
+      lightboxImg.src = "";
     }
 
     async function subirFoto(key, file) {
@@ -297,9 +378,15 @@
     const pdfHasta = document.getElementById("pdf-hasta");
     const btnPdf = document.getElementById("btn-pdf");
     const pdfMsg = document.getElementById("pdf-msg");
+    const btnTogglePdf = document.getElementById("btn-toggle-pdf");
+    const pdfOptions = document.getElementById("pdf-options");
 
     pdfDesde.value = toISO(currentDate);
     pdfHasta.value = toISO(currentDate);
+
+    btnTogglePdf.addEventListener("click", () => {
+      pdfOptions.classList.toggle("open");
+    });
 
     btnPdf.addEventListener("click", async () => {
       pdfMsg.textContent = "";
