@@ -78,6 +78,17 @@ loguearse cada vez.
   específica.
 - **Grilla 2x2 con fotos más grandes**, en proporción 4:3 (la que suelen
   sacar los celulares), y se pueden tocar para verlas en pantalla completa.
+- **Opciones guardadas por comida**: al lado de cada campo de descripción hay
+  un botón ⭐ que guarda ese texto como "opción" para esa comida (ej: tus 3
+  desayunos habituales). Después, en el desplegable de arriba de ese mismo
+  campo, podés elegir directamente una de esas opciones en vez de escribir de
+  nuevo — al elegirla se guarda sola. Las opciones son por usuario y por tipo
+  de comida (Desayuno, Almuerzo, Merienda, Cena), y se comparten entre todos
+  los días.
+- **Descripción de cada foto**: debajo de cada foto (comida principal o
+  extra) hay un campo de texto para escribir una descripción — útil cuando
+  la foto no deja ver bien algún ingrediente. Se guarda con el botón 💾, y
+  también aparece impresa debajo del nombre de la comida en el PDF.
 - **Comidas extra**: si comiste algo fuera de las 4 comidas principales (ej:
   algo a media mañana), tocá "➕ Agregar comida extra", elegí después de cuál
   va (Desayuno, Almuerzo, Merienda o Cena), poné una descripción opcional

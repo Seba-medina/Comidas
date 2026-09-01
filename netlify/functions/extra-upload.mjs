@@ -22,6 +22,7 @@ export default async (req) => {
     const fecha = formData.get("fecha");
     const after = formData.get("after");
     let label = formData.get("label") || "";
+    let desc = formData.get("desc") || "";
     const file = formData.get("foto");
 
     if (!usuario || !USUARIO_REGEX.test(usuario)) return json400("Usuario inválido");
@@ -33,6 +34,7 @@ export default async (req) => {
     }
 
     label = String(label).slice(0, 40).trim();
+    desc = String(desc).slice(0, 300).trim();
 
     const store = getStore("comidas");
     const indexKey = `${usuario}:${fecha}:extras`;
@@ -46,7 +48,7 @@ export default async (req) => {
     }
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const nuevo = { id, after, label };
+    const nuevo = { id, after, label, desc };
     extras.push(nuevo);
 
     const buffer = await file.arrayBuffer();

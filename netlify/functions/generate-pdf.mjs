@@ -39,6 +39,36 @@ function chunk(array, size) {
   return chunks;
 }
 
+function wrapText(text, font, size, maxWidth, maxLines) {
+  if (!text) return [];
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines = [];
+  let current = "";
+
+  for (const word of words) {
+    const test = current ? `${current} ${word}` : word;
+    if (font.widthOfTextAtSize(test, size) > maxWidth && current) {
+      lines.push(current);
+      current = word;
+      if (lines.length === maxLines) break;
+    } else {
+      current = test;
+    }
+  }
+  if (lines.length < maxLines && current) lines.push(current);
+
+  // Si sobró texto sin usar, le agrega "..." a la última línea
+  const palabrasUsadas = lines.join(" ").split(/\s+/).filter(Boolean).length;
+  if (lines.length === maxLines && palabrasUsadas < words.length) {
+    let ultima = lines[lines.length - 1];
+    while (font.widthOfTextAtSize(`${ultima}...`, size) > maxWidth && ultima.length > 0) {
+      ultima = ultima.slice(0, -1);
+    }
+    lines[lines.length - 1] = `${ultima}...`;
+  }
+  return lines;
+}
+
 export default async (req) => {
   const url = new URL(req.url);
   const usuario = url.searchParams.get("usuario");
@@ -74,7 +104,7 @@ export default async (req) => {
     const fechaStr = formatFecha(fecha);
     const tituloBase = `${DIAS_SEMANA[fecha.getUTCDay()]} ${fecha.getUTCDate()} de ${MESES[fecha.getUTCMonth()]} de ${fecha.getUTCFullYear()}`;
 
-    // Traer las comidas extra de este día y armar la lista completa en orden
+    // Traer las comidas extra y las descripciones de este día
     let extras = [];
     try {
       const raw = await store.get(`${usuario}:${fechaStr}:extras`, { type: "json" });
@@ -82,12 +112,20 @@ export default async (req) => {
     } catch (e) {
       extras = [];
     }
+    let descripciones = {};
+    try {
+      const raw = await store.get(`${usuario}:${fechaStr}:descripciones`, { type: "json" });
+      if (raw && typeof raw === "object") descripciones = raw;
+    } catch (e) {
+      descripciones = {};
+    }
 
     const items = [];
     for (const comida of COMIDAS) {
       items.push({
         tipo: "base",
         label: comida.label,
+        desc: descripciones[comida.key] || "",
         blobKey: `${usuario}:${fechaStr}:${comida.key}`,
       });
       const extrasDeEsta = extras.filter((e) => e.after === comida.key);
@@ -95,6 +133,7 @@ export default async (req) => {
         items.push({
           tipo: "extra",
           label: extra.label ? `${extra.label} (extra)` : "Comida extra",
+          desc: extra.desc || "",
           blobKey: `${usuario}:${fechaStr}:extra:${extra.id}`,
         });
       }
@@ -130,7 +169,7 @@ export default async (req) => {
       ];
 
       for (let j = 0; j < itemsPagina.length; j++) {
-        const { label, blobKey } = itemsPagina[j];
+        const { label, desc, blobKey } = itemsPagina[j];
         const pos = posiciones[j];
 
         page.drawText(label, {
@@ -141,11 +180,28 @@ export default async (req) => {
           color: rgb(0.2, 0.2, 0.2),
         });
 
+        // Descripción (ingredientes, etc.), ajustada a 2 líneas
+        const descLineas = wrapText(desc, fontRegular, 9.5, cellW - 10, 2);
+        let descAltura = 0;
+        descLineas.forEach((linea, idx) => {
+          descAltura = (idx + 1) * 12;
+          page.drawText(linea, {
+            x: pos.x,
+            y: pos.y + cellH - 34 - idx * 12,
+            size: 9.5,
+            font: fontRegular,
+            color: rgb(0.4, 0.4, 0.4),
+          });
+        });
+
+        const espacioSuperior = 25 + (descLineas.length ? descAltura + 6 : 0);
+        const fotoAltura = cellH - espacioSuperior;
+
         page.drawRectangle({
           x: pos.x,
           y: pos.y,
           width: cellW,
-          height: cellH - 25,
+          height: fotoAltura,
           borderColor: rgb(0.85, 0.85, 0.85),
           borderWidth: 1,
         });
@@ -160,21 +216,21 @@ export default async (req) => {
               : await pdfDoc.embedJpg(entry.data);
 
             const boxW = cellW - 10;
-            const boxH = cellH - 35;
+            const boxH = fotoAltura - 10;
             const scale = Math.min(boxW / img.width, boxH / img.height);
             const imgW = img.width * scale;
             const imgH = img.height * scale;
 
             page.drawImage(img, {
               x: pos.x + (cellW - imgW) / 2,
-              y: pos.y + (cellH - 25 - imgH) / 2,
+              y: pos.y + (fotoAltura - imgH) / 2,
               width: imgW,
               height: imgH,
             });
           } catch (e) {
             page.drawText("No se pudo cargar la imagen", {
               x: pos.x + 10,
-              y: pos.y + cellH / 2,
+              y: pos.y + fotoAltura / 2,
               size: 10,
               font: fontRegular,
               color: rgb(0.8, 0.2, 0.2),
@@ -183,7 +239,7 @@ export default async (req) => {
         } else {
           page.drawText("Sin foto", {
             x: pos.x + 10,
-            y: pos.y + cellH / 2,
+            y: pos.y + fotoAltura / 2,
             size: 12,
             font: fontRegular,
             color: rgb(0.6, 0.6, 0.6),

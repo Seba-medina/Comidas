@@ -221,6 +221,50 @@
       color: #e63946;
     }
 
+    /* --- Fila de descripción (ingredientes) --- */
+    .desc-row {
+      display: flex;
+      gap: 6px;
+      padding: 10px;
+      border-top: 1px solid #f0f0f0;
+      align-items: center;
+    }
+    .desc-row input[type="text"] {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.85em;
+      min-width: 0;
+    }
+    .desc-row button {
+      background: #f4a261;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 0.85em;
+      flex-shrink: 0;
+    }
+    .desc-row button:hover { background: #e08c45; }
+    .desc-row button.guardado { background: #2a9d8f; }
+    .desc-row button.star { background: #6d9dc5; }
+    .desc-row button.star:hover { background: #5a89b0; }
+
+    .preset-row {
+      padding: 0 10px 8px;
+    }
+    .preset-row select {
+      width: 100%;
+      padding: 7px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.8em;
+      color: #555;
+      box-sizing: border-box;
+    }
+
     /* --- Tarjetas de comida extra --- */
     .extra-card h2 {
       background: #6d9dc5;
@@ -452,9 +496,18 @@
               <option value="cena">Cena</option>
             </select>
           </label>
-          <label>Descripción (opcional)
+          <label>Nombre (opcional)
             <input type="text" id="extra-label" placeholder="ej: Media mañana" maxlength="40">
           </label>
+        </div>
+        <label style="display:block; font-size:0.9em; margin-bottom:6px;">Descripción / ingredientes (opcional)
+          <input type="text" id="extra-desc" placeholder="ej: manzana con canela y nueces" maxlength="300"
+            style="width:100%; box-sizing:border-box; padding:8px; border-radius:6px; border:1px solid #ccc; margin-top:4px;">
+        </label>
+        <div class="preset-row" style="padding:0 0 14px;">
+          <select id="extra-preset">
+            <option value="">O elegí una opción guardada…</option>
+          </select>
         </div>
         <label id="label-extra-file" for="extra-file" class="extra-file-label">📷 Elegir foto</label>
         <input type="file" id="extra-file" accept="image/jpeg,image/png">
@@ -541,7 +594,7 @@
       document.getElementById("app").style.display = "block";
       document.getElementById("user-label").textContent = nombre;
       renderFechaLabel();
-      renderDia();
+      cargarPresets().then(renderDia);
     }
 
     document.getElementById("btn-entrar").addEventListener("click", () => {
@@ -601,15 +654,60 @@
 
     // ---------------- Comidas (con extras intercaladas) ----------------
     let extrasActuales = [];
+    let descripcionesActuales = {};
+    let presetsActuales = { desayuno: [], almuerzo: [], merienda: [], cena: [] };
+
+    async function cargarPresets() {
+      try {
+        const res = await fetch(`/api/presets?usuario=${encodeURIComponent(usuario)}`);
+        const data = await res.json();
+        if (data.presets) presetsActuales = data.presets;
+      } catch (e) {
+        // si falla, seguimos con lo que había
+      }
+    }
+
+    async function guardarComoOpcion(comida, texto) {
+      texto = (texto || "").trim();
+      if (!texto) {
+        alert("Escribí algo antes de guardarlo como opción.");
+        return;
+      }
+      try {
+        const res = await fetch("/api/presets-add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario, comida, texto }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "No se pudo guardar la opción");
+        presetsActuales[comida] = data.opciones;
+        buildGrid();
+        actualizarSelectExtraPreset();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function opcionesHTML(comida) {
+      const lista = presetsActuales[comida] || [];
+      return lista.map((t) => `<option value="${escapeAttr(t)}">${escapeHTML(t)}</option>`).join("");
+    }
 
     async function renderDia() {
       const fechaStr = toISO(currentDate);
       try {
-        const res = await fetch(`/api/extras?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`);
-        const data = await res.json();
-        extrasActuales = Array.isArray(data.extras) ? data.extras : [];
+        const [resExtras, resDesc] = await Promise.all([
+          fetch(`/api/extras?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
+          fetch(`/api/descriptions?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
+        ]);
+        const dataExtras = await resExtras.json();
+        const dataDesc = await resDesc.json();
+        extrasActuales = Array.isArray(dataExtras.extras) ? dataExtras.extras : [];
+        descripcionesActuales = dataDesc.descripciones || {};
       } catch (e) {
         extrasActuales = [];
+        descripcionesActuales = {};
       }
       buildGrid();
     }
@@ -617,19 +715,70 @@
     function crearCardBase(key, nombre) {
       const card = document.createElement("div");
       card.className = "card";
+      const descActual = descripcionesActuales[key] || "";
       card.innerHTML = `
         <h2>${nombre}</h2>
         <div class="img-wrap" id="wrap-${key}">Sin foto todavía</div>
         <label id="label-${key}" for="input-${key}">Subir / cambiar foto</label>
         <input type="file" id="input-${key}" accept="image/jpeg,image/png">
         <div class="msg" id="msg-${key}"></div>
+        <div class="preset-row">
+          <select id="preset-${key}">
+            <option value="">Elegí una opción guardada…</option>
+            ${opcionesHTML(key)}
+          </select>
+        </div>
+        <div class="desc-row">
+          <input type="text" id="desc-${key}" placeholder="Describí ingredientes..." maxlength="300" value="${escapeAttr(descActual)}">
+          <button id="btn-desc-${key}" title="Guardar para este día">💾</button>
+          <button id="btn-star-${key}" class="star" title="Guardar como opción para elegir después">⭐</button>
+        </div>
       `;
       card.querySelector(`#input-${key}`).addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (file) subirFoto(key, file);
         e.target.value = "";
       });
+      card.querySelector(`#btn-desc-${key}`).addEventListener("click", () => guardarDescripcionBase(key));
+      card.querySelector(`#desc-${key}`).addEventListener("keydown", (e) => {
+        if (e.key === "Enter") guardarDescripcionBase(key);
+      });
+      card.querySelector(`#btn-star-${key}`).addEventListener("click", () => {
+        const input = document.getElementById(`desc-${key}`);
+        guardarComoOpcion(key, input.value);
+      });
+      card.querySelector(`#preset-${key}`).addEventListener("change", (e) => {
+        if (!e.target.value) return;
+        const input = document.getElementById(`desc-${key}`);
+        input.value = e.target.value;
+        e.target.selectedIndex = 0;
+        guardarDescripcionBase(key);
+      });
       return card;
+    }
+
+    function escapeAttr(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML.replace(/"/g, "&quot;");
+    }
+
+    async function guardarDescripcionBase(key) {
+      const input = document.getElementById(`desc-${key}`);
+      const btn = document.getElementById(`btn-desc-${key}`);
+      try {
+        const res = await fetch("/api/set-description", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario, fecha: toISO(currentDate), comida: key, descripcion: input.value }),
+        });
+        if (!res.ok) throw new Error("No se pudo guardar");
+        btn.classList.add("guardado");
+        btn.textContent = "✅";
+        setTimeout(() => { btn.classList.remove("guardado"); btn.textContent = "💾"; }, 1500);
+      } catch (err) {
+        alert(err.message);
+      }
     }
 
     function escapeHTML(str) {
@@ -642,13 +791,58 @@
       const card = document.createElement("div");
       card.className = "card extra-card";
       const nombre = extra.label ? extra.label : "Comida extra";
+      const descActual = extra.desc || "";
       card.innerHTML = `
         <h2>${escapeHTML(nombre)}<span class="extra-tag">extra</span></h2>
         <div class="img-wrap" id="wrap-extra-${extra.id}">Cargando...</div>
         <button class="btn-eliminar-extra">🗑 Eliminar</button>
+        <div class="preset-row">
+          <select id="preset-extra-${extra.id}">
+            <option value="">Elegí una opción guardada…</option>
+            ${opcionesHTML(extra.after)}
+          </select>
+        </div>
+        <div class="desc-row">
+          <input type="text" id="desc-extra-${extra.id}" placeholder="Describí ingredientes..." maxlength="300" value="${escapeAttr(descActual)}">
+          <button id="btn-desc-extra-${extra.id}" title="Guardar para este día">💾</button>
+          <button id="btn-star-extra-${extra.id}" class="star" title="Guardar como opción para elegir después">⭐</button>
+        </div>
       `;
       card.querySelector(".btn-eliminar-extra").addEventListener("click", () => eliminarExtra(extra.id));
+      card.querySelector(`#btn-desc-extra-${extra.id}`).addEventListener("click", () => guardarDescripcionExtra(extra.id));
+      card.querySelector(`#desc-extra-${extra.id}`).addEventListener("keydown", (e) => {
+        if (e.key === "Enter") guardarDescripcionExtra(extra.id);
+      });
+      card.querySelector(`#btn-star-extra-${extra.id}`).addEventListener("click", () => {
+        const input = document.getElementById(`desc-extra-${extra.id}`);
+        guardarComoOpcion(extra.after, input.value);
+      });
+      card.querySelector(`#preset-extra-${extra.id}`).addEventListener("change", (e) => {
+        if (!e.target.value) return;
+        const input = document.getElementById(`desc-extra-${extra.id}`);
+        input.value = e.target.value;
+        e.target.selectedIndex = 0;
+        guardarDescripcionExtra(extra.id);
+      });
       return card;
+    }
+
+    async function guardarDescripcionExtra(id) {
+      const input = document.getElementById(`desc-extra-${id}`);
+      const btn = document.getElementById(`btn-desc-extra-${id}`);
+      try {
+        const res = await fetch("/api/extra-edit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario, fecha: toISO(currentDate), id, desc: input.value }),
+        });
+        if (!res.ok) throw new Error("No se pudo guardar");
+        btn.classList.add("guardado");
+        btn.textContent = "✅";
+        setTimeout(() => { btn.classList.remove("guardado"); btn.textContent = "💾"; }, 1500);
+      } catch (err) {
+        alert(err.message);
+      }
     }
 
     function buildGrid() {
@@ -778,6 +972,8 @@
     const extraOptions = document.getElementById("extra-options");
     const extraAfter = document.getElementById("extra-after");
     const extraLabelInput = document.getElementById("extra-label");
+    const extraDescInput = document.getElementById("extra-desc");
+    const extraPresetSelect = document.getElementById("extra-preset");
     const extraFileInput = document.getElementById("extra-file");
     const extraFileName = document.getElementById("extra-file-name");
     const btnExtraGuardar = document.getElementById("btn-extra-guardar");
@@ -785,6 +981,19 @@
 
     btnToggleExtra.addEventListener("click", () => {
       extraOptions.classList.toggle("open");
+      actualizarSelectExtraPreset();
+    });
+
+    function actualizarSelectExtraPreset() {
+      if (!extraPresetSelect) return;
+      const opciones = presetsActuales[extraAfter.value] || [];
+      extraPresetSelect.innerHTML = `<option value="">O elegí una opción guardada…</option>${opcionesHTML(extraAfter.value)}`;
+    }
+    extraAfter.addEventListener("change", actualizarSelectExtraPreset);
+    extraPresetSelect.addEventListener("change", (e) => {
+      if (!e.target.value) return;
+      extraDescInput.value = e.target.value;
+      e.target.selectedIndex = 0;
     });
 
     extraFileInput.addEventListener("change", () => {
@@ -808,6 +1017,7 @@
       formData.append("fecha", toISO(currentDate));
       formData.append("after", extraAfter.value);
       formData.append("label", extraLabelInput.value.trim());
+      formData.append("desc", extraDescInput.value.trim());
       formData.append("foto", file);
 
       try {
@@ -815,6 +1025,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "No se pudo agregar");
         extraLabelInput.value = "";
+        extraDescInput.value = "";
         extraFileInput.value = "";
         extraFileName.textContent = "";
         extraOptions.classList.remove("open");
