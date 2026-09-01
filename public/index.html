@@ -22,10 +22,10 @@
       font-family: 'Segoe UI', Arial, sans-serif;
       background: #faf6f0;
       margin: 0;
-      padding: 20px;
+      padding: 12px;
       color: #333;
     }
-    h1 { text-align: center; color: #b5651d; margin-bottom: 5px; }
+    h1 { text-align: center; color: #b5651d; margin: 4px 0; font-size: 1.4em; }
 
     /* --- Pantalla de usuario --- */
     .login-screen {
@@ -104,9 +104,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 14px;
+      gap: 10px;
       max-width: 640px;
-      margin: 20px auto;
+      margin: 10px auto;
       flex-wrap: wrap;
     }
     .day-nav button {
@@ -135,27 +135,27 @@
     .grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
+      gap: 10px;
       max-width: 900px;
-      margin: 30px auto;
+      margin: 14px auto;
     }
     .card {
       background: white;
-      border-radius: 14px;
+      border-radius: 12px;
       box-shadow: 0 3px 10px rgba(0,0,0,0.1);
       overflow: hidden;
       text-align: center;
     }
     .card h2 {
       margin: 0;
-      padding: 14px;
+      padding: 7px;
       background: #f4a261;
       color: white;
-      font-size: 1.2em;
+      font-size: 0.95em;
     }
     .img-wrap {
       width: 100%;
-      aspect-ratio: 4 / 3;
+      height: 100px;
       background: #eee;
       display: flex;
       align-items: center;
@@ -163,6 +163,10 @@
       color: #999;
       overflow: hidden;
       cursor: default;
+      font-size: 0.75em;
+    }
+    @media (min-width: 620px) {
+      .img-wrap { height: 190px; }
     }
     .img-wrap img {
       width: 100%;
@@ -204,19 +208,19 @@
     }
     .card label {
       display: block;
-      padding: 12px;
+      padding: 7px;
       background: #2a9d8f;
       color: white;
       font-weight: bold;
       cursor: pointer;
-      font-size: 0.95em;
+      font-size: 0.78em;
     }
     .card label:hover { background: #21867a; }
     .card label.loading { background: #999; cursor: wait; }
     .card input[type="file"] { display: none; }
     .msg {
-      font-size: 0.8em;
-      padding: 0 10px 10px;
+      font-size: 0.75em;
+      padding: 0 8px 6px;
       min-height: 1em;
       color: #e63946;
     }
@@ -224,17 +228,17 @@
     /* --- Fila de descripción (ingredientes) --- */
     .desc-row {
       display: flex;
-      gap: 6px;
-      padding: 10px;
+      gap: 4px;
+      padding: 6px 8px;
       border-top: 1px solid #f0f0f0;
       align-items: center;
     }
     .desc-row input[type="text"] {
       flex: 1;
-      padding: 8px;
+      padding: 6px;
       border-radius: 6px;
       border: 1px solid #ccc;
-      font-size: 0.85em;
+      font-size: 0.78em;
       min-width: 0;
     }
     .desc-row button {
@@ -242,9 +246,9 @@
       color: white;
       border: none;
       border-radius: 6px;
-      padding: 8px 10px;
+      padding: 6px 8px;
       cursor: pointer;
-      font-size: 0.85em;
+      font-size: 0.78em;
       flex-shrink: 0;
     }
     .desc-row button:hover { background: #e08c45; }
@@ -253,14 +257,14 @@
     .desc-row button.star:hover { background: #5a89b0; }
 
     .preset-row {
-      padding: 0 10px 8px;
+      padding: 0 8px 6px;
     }
     .preset-row select {
       width: 100%;
-      padding: 7px;
+      padding: 5px;
       border-radius: 6px;
       border: 1px solid #ccc;
-      font-size: 0.8em;
+      font-size: 0.72em;
       color: #555;
       box-sizing: border-box;
     }
@@ -283,47 +287,95 @@
     .btn-eliminar-extra {
       display: block;
       width: 100%;
-      padding: 10px;
+      padding: 7px;
       background: #e76f51;
       color: white;
       border: none;
       font-weight: bold;
       cursor: pointer;
-      font-size: 0.9em;
+      font-size: 0.78em;
     }
     .btn-eliminar-extra:hover { background: #d15c3e; }
 
-    /* --- Caja "agregar comida extra" --- */
-    .extra-box {
+    /* --- Barra de botones (abren ventanas modales) --- */
+    .action-bar {
+      display: flex;
+      gap: 8px;
       max-width: 640px;
-      margin: 30px auto;
+      margin: 16px auto;
+    }
+    .action-btn {
+      flex: 1;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 6px;
+      font-size: 0.85em;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+    .action-btn .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.3);
+      border-radius: 10px;
+      padding: 0 6px;
+      margin-left: 4px;
+      font-size: 0.9em;
+    }
+    #btn-open-activity { background: #588157; }
+    #btn-open-activity:hover { background: #466944; }
+    #btn-open-extra { background: #6d9dc5; }
+    #btn-open-extra:hover { background: #5a89b0; }
+    #btn-open-pdf { background: #b5651d; }
+    #btn-open-pdf:hover { background: #97531a; }
+
+    /* --- Ventanas modales genéricas --- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 950;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
       background: white;
       border-radius: 14px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      padding: 20px;
-      text-align: center;
-    }
-    #btn-toggle-extra {
-      background: #6d9dc5;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 14px 28px;
-      font-size: 1.05em;
-      cursor: pointer;
-      font-weight: bold;
+      max-width: 480px;
       width: 100%;
-    }
-    #btn-toggle-extra:hover { background: #5a89b0; }
-    .extra-options {
-      display: none;
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid #eee;
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 22px 20px 20px;
+      position: relative;
+      box-sizing: border-box;
       text-align: left;
     }
-    .extra-options.open { display: block; }
-    .extra-options p { margin-top: 0; font-size: 0.9em; color: #555; }
+    .modal-box h3 {
+      margin: 0 0 14px;
+      text-align: center;
+      font-size: 1.1em;
+      padding-right: 24px;
+    }
+    .modal-box p { margin-top: 0; font-size: 0.9em; color: #555; }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 1.7em;
+      line-height: 1;
+      color: #999;
+      cursor: pointer;
+    }
+    .modal-close:hover { color: #555; }
+
+    /* --- Contenido del modal "agregar comida extra" --- */
     .extra-form {
       display: flex;
       gap: 14px;
@@ -345,7 +397,7 @@
       border: 1px solid #ccc;
       font-size: 1em;
     }
-    .extra-box input[type="file"] { display: none; }
+    .modal-box input[type="file"] { display: none; }
     .extra-file-label {
       display: inline-block;
       background: #eee;
@@ -377,21 +429,7 @@
     #btn-extra-guardar:hover { background: #5a89b0; }
     #btn-extra-guardar:disabled { background: #ccc; cursor: wait; }
 
-    /* --- Caja "actividad física" --- */
-    .activity-box {
-      max-width: 640px;
-      margin: 30px auto;
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      padding: 20px;
-    }
-    .activity-box h3 {
-      margin: 0 0 14px;
-      text-align: center;
-      color: #466944;
-      font-size: 1.1em;
-    }
+    /* --- Contenido del modal "actividad física" --- */
     .activity-list {
       margin-bottom: 14px;
     }
@@ -466,36 +504,8 @@
     }
     #btn-activity-star:hover { background: #5a89b0; }
 
-    .pdf-box {
-      max-width: 640px;
-      margin: 40px auto;
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      padding: 20px;
-      text-align: center;
-    }
-    #btn-toggle-pdf {
-      background: #b5651d;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 14px 28px;
-      font-size: 1.05em;
-      cursor: pointer;
-      font-weight: bold;
-      width: 100%;
-    }
-    #btn-toggle-pdf:hover { background: #97531a; }
-    .pdf-options {
-      display: none;
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid #eee;
-    }
-    .pdf-options.open { display: block; }
-    .pdf-options p { margin-top: 0; }
-    .pdf-options .rango {
+    /* --- Contenido del modal "generar PDF" --- */
+    .rango {
       display: flex;
       gap: 14px;
       justify-content: center;
@@ -503,14 +513,14 @@
       margin: 16px 0;
       align-items: center;
     }
-    .pdf-options label.rango-label {
+    label.rango-label {
       font-size: 0.9em;
       display: flex;
       flex-direction: column;
       gap: 4px;
       text-align: left;
     }
-    .pdf-options input[type="date"] {
+    .rango input[type="date"] {
       padding: 8px;
       border-radius: 6px;
       border: 1px solid #ccc;
@@ -524,6 +534,8 @@
       font-size: 1em;
       cursor: pointer;
       font-weight: bold;
+      display: block;
+      margin: 0 auto;
     }
     #btn-pdf:hover { background: #21867a; }
     #btn-pdf:disabled { background: #ccc; cursor: wait; }
@@ -531,6 +543,7 @@
       margin-top: 10px;
       font-size: 0.85em;
       min-height: 1em;
+      text-align: center;
       color: #e63946;
     }
   </style>
@@ -570,28 +583,40 @@
 
     <div class="grid" id="grid"></div>
 
-    <div class="activity-box">
-      <h3>🏃 Actividad física de hoy</h3>
-      <div class="activity-list" id="activity-list"></div>
-      <div class="activity-form">
-        <input type="text" id="activity-tipo" placeholder="ej: Gym, Correr, Fútbol..." maxlength="40">
-        <input type="text" id="activity-nota" placeholder="Nota opcional (ej: 5km, 1 hora)" maxlength="300">
-      </div>
-      <div class="preset-row">
-        <select id="activity-preset">
-          <option value="">O elegí una opción guardada…</option>
-        </select>
-      </div>
-      <div class="activity-actions">
-        <button id="btn-activity-add">➕ Agregar actividad</button>
-        <button id="btn-activity-star" title="Guardar como opción para elegir después">⭐</button>
-      </div>
-      <div class="msg" id="activity-msg"></div>
+    <div class="action-bar">
+      <button id="btn-open-activity">🏃 Actividad<span class="badge" id="activity-badge" style="display:none"></span></button>
+      <button id="btn-open-extra">➕ Extra</button>
+      <button id="btn-open-pdf">📄 PDF</button>
     </div>
 
-    <div class="extra-box">
-      <button id="btn-toggle-extra">➕ Agregar comida extra</button>
-      <div class="extra-options" id="extra-options">
+    <!-- Modal: actividad física -->
+    <div class="modal-overlay" id="modal-activity">
+      <div class="modal-box">
+        <button class="modal-close" data-close="modal-activity">&times;</button>
+        <h3>🏃 Actividad física de hoy</h3>
+        <div class="activity-list" id="activity-list"></div>
+        <div class="activity-form">
+          <input type="text" id="activity-tipo" placeholder="ej: Gym, Correr, Fútbol..." maxlength="40">
+          <input type="text" id="activity-nota" placeholder="Nota opcional (ej: 5km, 1 hora)" maxlength="300">
+        </div>
+        <div class="preset-row" style="padding:0 0 10px;">
+          <select id="activity-preset">
+            <option value="">O elegí una opción guardada…</option>
+          </select>
+        </div>
+        <div class="activity-actions">
+          <button id="btn-activity-add">➕ Agregar actividad</button>
+          <button id="btn-activity-star" title="Guardar como opción para elegir después">⭐</button>
+        </div>
+        <div class="msg" id="activity-msg"></div>
+      </div>
+    </div>
+
+    <!-- Modal: agregar comida extra -->
+    <div class="modal-overlay" id="modal-extra">
+      <div class="modal-box">
+        <button class="modal-close" data-close="modal-extra">&times;</button>
+        <h3>➕ Agregar comida extra</h3>
         <p>Para algo que comiste fuera de las 4 comidas principales (ej: algo
           a media mañana). Elegí después de cuál va, una descripción
           opcional, y la foto.</p>
@@ -625,9 +650,11 @@
       </div>
     </div>
 
-    <div class="pdf-box">
-      <button id="btn-toggle-pdf">📄 Generar PDF</button>
-      <div class="pdf-options" id="pdf-options">
+    <!-- Modal: generar PDF -->
+    <div class="modal-overlay" id="modal-pdf">
+      <div class="modal-box">
+        <button class="modal-close" data-close="modal-pdf">&times;</button>
+        <h3>📄 Generar PDF</h3>
         <p>Elegí el rango de fechas (una hoja por día con las comidas, y al
           final un resumen con cuántas veces hiciste cada actividad física).</p>
         <div class="rango">
@@ -1093,9 +1120,34 @@
       renderDia();
     });
 
+    // ---------------- Ventanas modales (actividad / extra / pdf) ----------------
+    function abrirModal(id) {
+      document.getElementById(id).classList.add("open");
+    }
+    function cerrarModal(id) {
+      document.getElementById(id).classList.remove("open");
+    }
+    document.querySelectorAll(".modal-overlay").forEach((overlay) => {
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) cerrarModal(overlay.id);
+      });
+    });
+    document.querySelectorAll(".modal-close").forEach((btn) => {
+      btn.addEventListener("click", () => cerrarModal(btn.dataset.close));
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      document.querySelectorAll(".modal-overlay.open").forEach((overlay) => cerrarModal(overlay.id));
+    });
+
+    document.getElementById("btn-open-activity").addEventListener("click", () => abrirModal("modal-activity"));
+    document.getElementById("btn-open-extra").addEventListener("click", () => {
+      abrirModal("modal-extra");
+      actualizarSelectExtraPreset();
+    });
+    document.getElementById("btn-open-pdf").addEventListener("click", () => abrirModal("modal-pdf"));
+
     // ---------------- Agregar comida extra ----------------
-    const btnToggleExtra = document.getElementById("btn-toggle-extra");
-    const extraOptions = document.getElementById("extra-options");
     const extraAfter = document.getElementById("extra-after");
     const extraLabelInput = document.getElementById("extra-label");
     const extraDescInput = document.getElementById("extra-desc");
@@ -1104,11 +1156,6 @@
     const extraFileName = document.getElementById("extra-file-name");
     const btnExtraGuardar = document.getElementById("btn-extra-guardar");
     const extraMsg = document.getElementById("extra-msg");
-
-    btnToggleExtra.addEventListener("click", () => {
-      extraOptions.classList.toggle("open");
-      actualizarSelectExtraPreset();
-    });
 
     function actualizarSelectExtraPreset() {
       if (!extraPresetSelect) return;
@@ -1154,7 +1201,7 @@
         extraDescInput.value = "";
         extraFileInput.value = "";
         extraFileName.textContent = "";
-        extraOptions.classList.remove("open");
+        cerrarModal("modal-extra");
         renderDia();
       } catch (err) {
         extraMsg.textContent = err.message;
@@ -1179,6 +1226,13 @@
           row.querySelector("button").addEventListener("click", () => eliminarActividad(act.id));
           list.appendChild(row);
         }
+      }
+      const badge = document.getElementById("activity-badge");
+      if (actividadesActuales.length) {
+        badge.textContent = actividadesActuales.length;
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
       }
       actualizarSelectActivityPreset();
     }
@@ -1283,15 +1337,9 @@
     const pdfHasta = document.getElementById("pdf-hasta");
     const btnPdf = document.getElementById("btn-pdf");
     const pdfMsg = document.getElementById("pdf-msg");
-    const btnTogglePdf = document.getElementById("btn-toggle-pdf");
-    const pdfOptions = document.getElementById("pdf-options");
 
     pdfDesde.value = toISO(currentDate);
     pdfHasta.value = toISO(currentDate);
-
-    btnTogglePdf.addEventListener("click", () => {
-      pdfOptions.classList.toggle("open");
-    });
 
     btnPdf.addEventListener("click", async () => {
       pdfMsg.textContent = "";
