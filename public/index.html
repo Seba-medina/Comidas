@@ -1209,28 +1209,47 @@
 
     async function renderDia() {
       const fechaStr = toISO(currentDate);
+      const qs = `usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`;
+
+      // Cada fetch se resuelve de forma independiente: si uno falla (por
+      // ejemplo /api/scores todavía no está desplegado), no debe borrar los
+      // datos de los demás (extras, descripciones, actividades).
+      const [resExtras, resDesc, resAct, resScores] = await Promise.all([
+        fetch(`/api/extras?${qs}`).catch(() => null),
+        fetch(`/api/descriptions?${qs}`).catch(() => null),
+        fetch(`/api/activities?${qs}`).catch(() => null),
+        fetch(`/api/scores?${qs}`).catch(() => null),
+      ]);
+
       try {
-        const [resExtras, resDesc, resAct, resScores] = await Promise.all([
-          fetch(`/api/extras?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
-          fetch(`/api/descriptions?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
-          fetch(`/api/activities?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
-          fetch(`/api/scores?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
-        ]);
         const dataExtras = await resExtras.json();
-        const dataDesc = await resDesc.json();
-        const dataAct = await resAct.json();
-        const dataScores = await resScores.json();
         extrasActuales = Array.isArray(dataExtras.extras) ? dataExtras.extras : [];
+      } catch (e) {
+        extrasActuales = [];
+      }
+
+      try {
+        const dataDesc = await resDesc.json();
         descripcionesActuales = dataDesc.descripciones || {};
+      } catch (e) {
+        descripcionesActuales = {};
+      }
+
+      try {
+        const dataAct = await resAct.json();
         actividadesActuales = Array.isArray(dataAct.actividades) ? dataAct.actividades : [];
+      } catch (e) {
+        actividadesActuales = [];
+      }
+
+      try {
+        const dataScores = await resScores.json();
         puntajesActuales = dataScores.puntajes || { extras: {} };
         if (!puntajesActuales.extras) puntajesActuales.extras = {};
       } catch (e) {
-        extrasActuales = [];
-        descripcionesActuales = {};
-        actividadesActuales = [];
         puntajesActuales = { extras: {} };
       }
+
       buildGrid();
       renderActividades();
     }
