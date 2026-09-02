@@ -359,6 +359,26 @@
       color: var(--danger);
     }
 
+    /* --- Puntaje 1-5 por comida --- */
+    .rating-row {
+      display: flex;
+      justify-content: center;
+      gap: 2px;
+      padding: 6px 4px 2px;
+    }
+    .rating-star {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.25em;
+      line-height: 1;
+      padding: 2px;
+      color: var(--line);
+      transition: transform 0.1s;
+    }
+    .rating-star.lleno { color: var(--mustard-deep); }
+    .rating-star:hover { transform: scale(1.15); }
+
     /* --- Fila de descripción (ingredientes) --- */
     .desc-row {
       display: flex;
@@ -519,6 +539,7 @@
     #btn-open-activity { border-left-color: var(--sage-deep); }
     #btn-open-extra { border-left-color: var(--apricot-deep); }
     #btn-open-pdf { border-left-color: #4A3524; }
+    #btn-open-progreso { border-left-color: var(--mustard-deep); }
 
     /* --- Ventanas modales genéricas --- */
     .modal-overlay {
@@ -549,6 +570,7 @@
     #modal-activity .modal-box { border-top-color: var(--sage-deep); }
     #modal-extra .modal-box { border-top-color: var(--apricot-deep); }
     #modal-pdf .modal-box { border-top-color: #4A3524; }
+    #modal-progreso .modal-box { border-top-color: var(--mustard-deep); }
     @media (min-width: 860px) {
       #modal-activity .modal-box, #modal-extra .modal-box, #modal-pdf .modal-box {
         border-top-width: 4px;
@@ -759,6 +781,83 @@
       text-align: center;
       color: var(--danger);
     }
+
+    /* --- Contenido del modal "mi progreso" --- */
+    .racha-box {
+      text-align: center;
+      padding: 10px 0 16px;
+    }
+    .racha-numero {
+      font-family: var(--font-display);
+      font-size: 2.6em;
+      font-weight: 600;
+      color: var(--mustard-deep);
+      display: block;
+      line-height: 1;
+    }
+    .racha-texto {
+      font-size: 0.85em;
+      color: var(--ink-soft);
+    }
+    .calendario-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+    .calendario-nav button {
+      background: var(--paper-deep);
+      border: 1px solid var(--line);
+      color: var(--rust-deep);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      font-size: 1.1em;
+    }
+    .calendario-mes {
+      font-weight: 700;
+      font-size: 0.95em;
+      color: var(--ink);
+      text-transform: capitalize;
+      min-width: 130px;
+      text-align: center;
+    }
+    .calendario-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+    .calendario-dia {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 0.78em;
+      color: var(--ink);
+    }
+    .calendario-dia.estado-verde { background: #C7D4AE; color: var(--sage-deep); font-weight: 700; }
+    .calendario-dia.estado-amarillo { background: #F0DBA0; color: #7A5C10; font-weight: 700; }
+    .calendario-dia.estado-rojo { background: #E4B4AC; color: var(--danger); font-weight: 700; }
+    .calendario-dia.estado-gris { background: var(--paper-deep); color: var(--ink-soft); }
+    .calendario-dia.vacio { background: none; }
+    .calendario-leyenda {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 14px;
+      font-size: 0.78em;
+      color: var(--ink-soft);
+    }
+    .calendario-leyenda span { display: flex; align-items: center; gap: 5px; }
+    .calendario-leyenda .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+    .dot-verde { background: #8FA467; }
+    .dot-amarillo { background: #D8AE3F; }
+    .dot-rojo { background: #C97C6C; }
+    .dot-gris { background: var(--line); }
   </style>
 </head>
 <body>
@@ -799,6 +898,10 @@
             <button id="btn-open-pdf" class="quick-menu-item">
               <span class="qmi-icon" aria-hidden="true">📄</span>
               <span class="qmi-label">Generar PDF</span>
+            </button>
+            <button id="btn-open-progreso" class="quick-menu-item">
+              <span class="qmi-icon" aria-hidden="true">🏆</span>
+              <span class="qmi-label">Mi progreso</span>
             </button>
           </nav>
         </div>
@@ -889,6 +992,30 @@
         </div>
         <button id="btn-pdf">Descargar PDF</button>
         <div class="pdf-msg" id="pdf-msg"></div>
+      </div>
+    </div>
+
+    <!-- Modal: mi progreso (racha + calendario) -->
+    <div class="modal-overlay" id="modal-progreso">
+      <div class="modal-box">
+        <button class="modal-close" data-close="modal-progreso">&times;</button>
+        <h3>🏆 Mi progreso</h3>
+        <div class="racha-box">
+          <span class="racha-numero" id="racha-numero">–</span>
+          <span class="racha-texto" id="racha-texto">días seguidos cumpliendo</span>
+        </div>
+        <div class="calendario-nav">
+          <button id="btn-mes-prev" aria-label="Mes anterior">‹</button>
+          <span class="calendario-mes" id="calendario-mes-label"></span>
+          <button id="btn-mes-next" aria-label="Mes siguiente">›</button>
+        </div>
+        <div class="calendario-grid" id="calendario-grid"></div>
+        <div class="calendario-leyenda">
+          <span><i class="dot dot-verde"></i> Bien</span>
+          <span><i class="dot dot-amarillo"></i> Regular</span>
+          <span><i class="dot dot-rojo"></i> Mal</span>
+          <span><i class="dot dot-gris"></i> Sin datos</span>
+        </div>
       </div>
     </div>
       </aside>
@@ -1030,6 +1157,7 @@
     let descripcionesActuales = {};
     let presetsActuales = { desayuno: [], almuerzo: [], merienda: [], cena: [] };
     let actividadesActuales = [];
+    let puntajesActuales = { extras: {} };
     let presetsActividad = [];
 
     async function cargarPresets() {
@@ -1082,21 +1210,26 @@
     async function renderDia() {
       const fechaStr = toISO(currentDate);
       try {
-        const [resExtras, resDesc, resAct] = await Promise.all([
+        const [resExtras, resDesc, resAct, resScores] = await Promise.all([
           fetch(`/api/extras?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
           fetch(`/api/descriptions?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
           fetch(`/api/activities?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
+          fetch(`/api/scores?usuario=${encodeURIComponent(usuario)}&fecha=${fechaStr}`),
         ]);
         const dataExtras = await resExtras.json();
         const dataDesc = await resDesc.json();
         const dataAct = await resAct.json();
+        const dataScores = await resScores.json();
         extrasActuales = Array.isArray(dataExtras.extras) ? dataExtras.extras : [];
         descripcionesActuales = dataDesc.descripciones || {};
         actividadesActuales = Array.isArray(dataAct.actividades) ? dataAct.actividades : [];
+        puntajesActuales = dataScores.puntajes || { extras: {} };
+        if (!puntajesActuales.extras) puntajesActuales.extras = {};
       } catch (e) {
         extrasActuales = [];
         descripcionesActuales = {};
         actividadesActuales = [];
+        puntajesActuales = { extras: {} };
       }
       buildGrid();
       renderActividades();
@@ -1112,6 +1245,7 @@
         <label id="label-${key}" for="input-${key}">Subir / cambiar foto</label>
         <input type="file" id="input-${key}" accept="image/jpeg,image/png">
         <div class="msg" id="msg-${key}"></div>
+        <div class="rating-row" id="rating-${key}" data-comida="${key}"></div>
         <div class="preset-row">
           <select id="preset-${key}">
             <option value="">Elegí una opción guardada…</option>
@@ -1124,6 +1258,9 @@
           <button id="btn-star-${key}" class="star" title="Guardar como opción para elegir después">⭐</button>
         </div>
       `;
+      renderEstrellas(card.querySelector(`#rating-${key}`), puntajesActuales[key] || 0, (valor) => {
+        puntuarComida(key, null, valor);
+      });
       card.querySelector(`#input-${key}`).addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (file) subirFoto(key, file);
@@ -1186,6 +1323,7 @@
         <h2>${escapeHTML(nombre)}<span class="extra-tag">extra</span></h2>
         <div class="img-wrap" id="wrap-extra-${extra.id}">Cargando...</div>
         <button class="btn-eliminar-extra">🗑 Eliminar</button>
+        <div class="rating-row" id="rating-extra-${extra.id}"></div>
         <div class="preset-row">
           <select id="preset-extra-${extra.id}">
             <option value="">Elegí una opción guardada…</option>
@@ -1198,6 +1336,10 @@
           <button id="btn-star-extra-${extra.id}" class="star" title="Guardar como opción para elegir después">⭐</button>
         </div>
       `;
+      const puntajeExtra = (puntajesActuales.extras && puntajesActuales.extras[extra.id]) || 0;
+      renderEstrellas(card.querySelector(`#rating-extra-${extra.id}`), puntajeExtra, (valor) => {
+        puntuarComida("extra", extra.id, valor);
+      });
       card.querySelector(".btn-eliminar-extra").addEventListener("click", () => eliminarExtra(extra.id));
       card.querySelector(`#btn-desc-extra-${extra.id}`).addEventListener("click", () => guardarDescripcionExtra(extra.id));
       card.querySelector(`#desc-extra-${extra.id}`).addEventListener("keydown", (e) => {
@@ -1230,6 +1372,45 @@
         btn.classList.add("guardado");
         btn.textContent = "✅";
         setTimeout(() => { btn.classList.remove("guardado"); btn.textContent = "💾"; }, 1500);
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function renderEstrellas(container, valorActual, onElegir) {
+      if (!container) return;
+      container.innerHTML = "";
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rating-star" + (i <= valorActual ? " lleno" : "");
+        btn.textContent = i <= valorActual ? "★" : "☆";
+        btn.title = `Puntuar ${i} de 5`;
+        btn.addEventListener("click", () => {
+          // Tocar la estrella ya elegida la borra (toggle), sirve para corregir sin abrir otro menú.
+          const nuevoValor = valorActual === i ? 0 : i;
+          onElegir(nuevoValor);
+        });
+        container.appendChild(btn);
+      }
+    }
+
+    async function puntuarComida(comida, extraId, valor) {
+      try {
+        const res = await fetch("/api/set-score", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario, fecha: toISO(currentDate), comida, extraId, score: valor }),
+        });
+        if (!res.ok) throw new Error("No se pudo guardar el puntaje");
+        const data = await res.json();
+        puntajesActuales = data.puntajes || puntajesActuales;
+        if (!puntajesActuales.extras) puntajesActuales.extras = {};
+        if (comida === "extra") {
+          renderEstrellas(document.getElementById(`rating-extra-${extraId}`), puntajesActuales.extras[extraId] || 0, (v) => puntuarComida("extra", extraId, v));
+        } else {
+          renderEstrellas(document.getElementById(`rating-${comida}`), puntajesActuales[comida] || 0, (v) => puntuarComida(comida, null, v));
+        }
       } catch (err) {
         alert(err.message);
       }
@@ -1408,6 +1589,74 @@
     document.getElementById("btn-open-pdf").addEventListener("click", () => {
       abrirModal("modal-pdf");
       toggleMenu(false);
+    });
+    document.getElementById("btn-open-progreso").addEventListener("click", () => {
+      abrirModal("modal-progreso");
+      toggleMenu(false);
+      cargarProgreso();
+    });
+
+    // ---------------- Mi progreso (racha + calendario) ----------------
+    const MESES_LARGO = [
+      "enero", "febrero", "marzo", "abril", "mayo", "junio",
+      "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+    ];
+    let mesProgreso = null; // {anio, mes} (mes 1-12), se inicializa al abrir el modal
+
+    function mesActualDeHoy() {
+      const hoy = new Date();
+      return { anio: hoy.getFullYear(), mes: hoy.getMonth() + 1 };
+    }
+
+    async function cargarProgreso() {
+      if (!mesProgreso) mesProgreso = mesActualDeHoy();
+      const mesStr = `${mesProgreso.anio}-${String(mesProgreso.mes).padStart(2, "0")}`;
+      const hoyStr = toISO(new Date());
+      document.getElementById("calendario-mes-label").textContent = `${MESES_LARGO[mesProgreso.mes - 1]} ${mesProgreso.anio}`;
+      document.getElementById("calendario-grid").innerHTML = "";
+      try {
+        const res = await fetch(`/api/progreso?usuario=${encodeURIComponent(usuario)}&mes=${mesStr}&hoy=${hoyStr}`);
+        const data = await res.json();
+        document.getElementById("racha-numero").textContent = data.alcanzoLimite ? `${data.racha}+` : data.racha;
+        document.getElementById("racha-texto").textContent =
+          data.racha === 1 ? "día seguido cumpliendo" : "días seguidos cumpliendo";
+        renderCalendario(data.dias || [], mesProgreso);
+      } catch (e) {
+        document.getElementById("racha-numero").textContent = "–";
+      }
+    }
+
+    function renderCalendario(dias, { anio, mes }) {
+      const grid = document.getElementById("calendario-grid");
+      grid.innerHTML = "";
+      // Días vacíos para alinear el 1° del mes con el día de la semana que corresponde.
+      const primerDiaSemana = new Date(anio, mes - 1, 1).getDay();
+      for (let i = 0; i < primerDiaSemana; i++) {
+        const vacio = document.createElement("div");
+        vacio.className = "calendario-dia vacio";
+        grid.appendChild(vacio);
+      }
+      dias.forEach((dia) => {
+        const num = Number(dia.fecha.slice(-2));
+        const celda = document.createElement("div");
+        celda.className = `calendario-dia estado-${dia.estado}`;
+        celda.textContent = num;
+        celda.title = dia.fecha;
+        grid.appendChild(celda);
+      });
+    }
+
+    document.getElementById("btn-mes-prev").addEventListener("click", () => {
+      if (!mesProgreso) mesProgreso = mesActualDeHoy();
+      mesProgreso.mes -= 1;
+      if (mesProgreso.mes < 1) { mesProgreso.mes = 12; mesProgreso.anio -= 1; }
+      cargarProgreso();
+    });
+    document.getElementById("btn-mes-next").addEventListener("click", () => {
+      if (!mesProgreso) mesProgreso = mesActualDeHoy();
+      mesProgreso.mes += 1;
+      if (mesProgreso.mes > 12) { mesProgreso.mes = 1; mesProgreso.anio += 1; }
+      cargarProgreso();
     });
 
     // ---------------- Agregar comida extra ----------------
