@@ -6,7 +6,7 @@
   <title>Comidas del Día</title>
 
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#b5651d">
+  <meta name="theme-color" content="#A9451D">
 
   <!-- iPhone: agregar a pantalla de inicio -->
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -17,196 +17,286 @@
   <!-- Android / genérico -->
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #faf6f0;
-      margin: 0;
-      padding: 12px;
-      color: #333;
+    :root {
+      --paper: #F6EEDC;
+      --paper-deep: #EEE1C3;
+      --card: #FFFBF2;
+      --ink: #3B2C1F;
+      --ink-soft: #7A6752;
+      --line: #DFCCA4;
+      --line-soft: #EADFC4;
+
+      --rust: #A9451D;
+      --rust-deep: #863213;
+      --mustard: #B8801F;
+      --mustard-deep: #96690F;
+      --apricot: #C1642B;
+      --apricot-deep: #9C4C1E;
+      --plum: #6E4550;
+      --plum-deep: #573540;
+      --sage: #5F6F42;
+      --sage-deep: #4A5733;
+      --danger: #9B3A2C;
+
+      --radius: 14px;
+      --radius-sm: 9px;
+      --shadow: 0 2px 0 rgba(59,44,31,0.06), 0 8px 20px -12px rgba(59,44,31,0.35);
+      --font-display: "Fraunces", Georgia, serif;
+      --font-body: "Karla", "Segoe UI", Arial, sans-serif;
     }
-    h1 { text-align: center; color: #b5651d; margin: 4px 0; font-size: 1.4em; }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--paper);
+      background-image:
+        radial-gradient(rgba(169,69,29,0.05) 1px, transparent 1px);
+      background-size: 22px 22px;
+      margin: 0;
+      padding: 0 0 28px;
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3 { font-family: var(--font-display); font-weight: 600; }
+
+    a { color: var(--rust-deep); }
+
+    button, input, select {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--rust);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
 
     /* --- Pantalla de usuario --- */
     .login-screen {
-      min-height: 80vh;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 20px;
     }
     .login-box {
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      padding: 30px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 34px 30px 28px;
       max-width: 420px;
       width: 100%;
       text-align: center;
-      box-sizing: border-box;
+      position: relative;
     }
-    .login-box p { color: #555; font-size: 0.95em; }
+    .login-box::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border: 1px dashed var(--line);
+      border-radius: 13px;
+      pointer-events: none;
+    }
+    .login-box .brand-mark {
+      font-size: 2.1em;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .login-box h1 {
+      margin: 4px 0 2px;
+      font-size: 1.7em;
+      color: var(--rust-deep);
+      font-weight: 600;
+    }
+    .login-box p { color: var(--ink-soft); font-size: 0.95em; line-height: 1.5; }
     .login-box input[type="text"] {
       width: 100%;
-      padding: 12px;
+      padding: 13px 14px;
       font-size: 1.1em;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-      margin: 14px 0 6px;
+      font-family: var(--font-body);
+      border: 1.5px solid var(--line);
+      background: var(--paper);
+      border-radius: var(--radius-sm);
+      margin: 16px 0 6px;
       text-align: center;
     }
+    .login-box input[type="text"]:focus { border-color: var(--rust); }
     .login-box button {
-      background: #2a9d8f;
-      color: white;
+      background: var(--rust);
+      color: var(--paper);
       border: none;
-      border-radius: 8px;
-      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      padding: 13px 24px;
       font-size: 1em;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
       width: 100%;
       margin-top: 10px;
+      transition: background 0.15s;
     }
-    .login-box button:hover { background: #21867a; }
+    .login-box button:hover { background: var(--rust-deep); }
     .login-msg {
-      color: #e63946;
+      color: var(--danger);
       font-size: 0.85em;
       min-height: 1.2em;
-      margin-top: 8px;
+      margin-top: 10px;
     }
 
-    /* --- Barra de usuario --- */
+    /* --- Encabezado --- */
+    .app-header {
+      background: var(--rust);
+      background-image: linear-gradient(180deg, var(--rust) 0%, var(--rust-deep) 100%);
+      padding: 18px 16px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 14px -8px rgba(59,44,31,0.5);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-mark { font-size: 1.5em; }
+    .app-header h1 {
+      color: var(--paper);
+      margin: 0;
+      font-size: 1.5em;
+      letter-spacing: 0.2px;
+    }
     .user-bar {
       max-width: 900px;
-      margin: 0 auto 10px;
+      margin: 10px auto 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
-      font-size: 0.9em;
-      color: #555;
+      font-size: 0.85em;
     }
-    .user-bar b { color: #b5651d; }
+    .user-chip {
+      color: rgba(246,238,220,0.85);
+      padding: 5px 4px;
+    }
+    .user-chip b { color: var(--paper); }
     .user-bar button {
-      background: none;
-      border: 1px solid #ccc;
+      background: rgba(246,238,220,0.14);
+      border: 1px solid rgba(246,238,220,0.4);
       border-radius: 20px;
-      padding: 5px 14px;
+      padding: 6px 14px;
       cursor: pointer;
-      font-size: 0.9em;
-      color: #444;
+      font-size: 0.95em;
+      color: var(--paper);
+      transition: background 0.15s;
     }
-    .user-bar button:hover { background: #eee; }
-    .user-bar .copiado { color: #2a9d8f; font-weight: bold; }
+    .user-bar button:hover { background: rgba(246,238,220,0.26); }
+    .user-bar .copiado { color: #E8F0DD; font-weight: 700; }
 
     .day-nav {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 14px;
       max-width: 640px;
-      margin: 10px auto;
-      flex-wrap: wrap;
+      margin: 4px auto 10px;
+      padding: 0 12px;
     }
     .day-nav button {
-      background: #f4a261;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 1em;
+      background: var(--card);
+      border: 1.5px solid var(--line);
+      color: var(--rust-deep);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      font-size: 1.2em;
+      line-height: 1;
       cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
     }
-    .day-nav button:hover { background: #e08c45; }
+    .day-nav button:hover { background: var(--paper-deep); border-color: var(--rust); }
+    .day-nav .fecha-wrap { text-align: center; flex: 1; min-width: 0; }
     .day-nav .fecha {
-      font-weight: bold;
-      font-size: 1.1em;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.25em;
       text-align: center;
-      min-width: 220px;
       text-transform: capitalize;
+      color: var(--ink);
+      line-height: 1.2;
     }
     .day-nav input[type="date"] {
-      padding: 6px;
+      margin-top: 4px;
+      padding: 5px 8px;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink-soft);
+      font-size: 0.82em;
     }
 
     /* --- Layout: barra lateral + contenido --- */
     .layout {
       max-width: 1180px;
       margin: 0 auto;
+      padding: 0 14px;
       display: flex;
       flex-direction: column;
     }
     .main-col { min-width: 0; }
 
-    @media (min-width: 860px) {
-      .layout {
-        flex-direction: row;
-        align-items: flex-start;
-        gap: 22px;
-      }
-      .sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        width: 300px;
-        flex-shrink: 0;
-        order: -1;
-      }
-      .main-col { flex: 1; }
-      .action-bar { display: none; }
-      .modal-overlay {
-        position: static !important;
-        display: block !important;
-        background: none !important;
-        padding: 0 !important;
-        inset: auto !important;
-      }
-      .modal-box {
-        max-width: none;
-        max-height: none;
-        overflow: visible;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        margin: 0;
-      }
-      .modal-close { display: none; }
-      .modal-box h3 { padding-right: 0; }
-    }
-
     .grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
+      gap: 12px;
       max-width: 900px;
-      margin: 14px auto;
+      margin: 6px auto 14px;
     }
     .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      background: var(--card);
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       overflow: hidden;
       text-align: center;
     }
     .card h2 {
       margin: 0;
-      padding: 7px;
-      background: #f4a261;
-      color: white;
-      font-size: 0.95em;
+      padding: 9px 8px;
+      background: var(--mustard-deep);
+      color: var(--paper);
+      font-size: 1em;
+      font-weight: 600;
+      letter-spacing: 0.2px;
     }
+    .card-desayuno h2 { background: var(--mustard-deep); }
+    .card-almuerzo h2 { background: var(--rust-deep); }
+    .card-merienda h2 { background: var(--apricot-deep); }
+    .card-cena h2 { background: var(--plum-deep); }
+
     .img-wrap {
       width: 100%;
-      height: 100px;
-      background: #eee;
+      height: 108px;
+      background: var(--paper-deep);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #999;
+      color: var(--ink-soft);
       overflow: hidden;
       cursor: default;
       font-size: 0.75em;
+      font-family: var(--font-body);
     }
     @media (min-width: 620px) {
       .img-wrap { height: 190px; }
@@ -217,14 +307,14 @@
       object-fit: contain;
       display: block;
       cursor: zoom-in;
-      background: #222;
+      background: #241c14;
     }
 
     .lightbox {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(20, 14, 8, 0.92);
       z-index: 1000;
       align-items: center;
       justify-content: center;
@@ -242,7 +332,7 @@
       position: absolute;
       top: 16px;
       right: 24px;
-      color: white;
+      color: var(--paper);
       font-size: 2.2em;
       cursor: pointer;
       line-height: 1;
@@ -251,70 +341,75 @@
     }
     .card label {
       display: block;
-      padding: 7px;
-      background: #2a9d8f;
-      color: white;
-      font-weight: bold;
+      padding: 9px;
+      background: var(--sage-deep);
+      color: var(--paper);
+      font-weight: 700;
       cursor: pointer;
       font-size: 0.78em;
+      transition: background 0.15s;
     }
-    .card label:hover { background: #21867a; }
-    .card label.loading { background: #999; cursor: wait; }
+    .card label:hover { background: #3c4728; }
+    .card label.loading { background: var(--ink-soft); cursor: wait; }
     .card input[type="file"] { display: none; }
     .msg {
       font-size: 0.75em;
       padding: 0 8px 6px;
       min-height: 1em;
-      color: #e63946;
+      color: var(--danger);
     }
 
     /* --- Fila de descripción (ingredientes) --- */
     .desc-row {
       display: flex;
       gap: 4px;
-      padding: 6px 8px;
-      border-top: 1px solid #f0f0f0;
+      padding: 8px 8px;
+      border-top: 1px dashed var(--line);
       align-items: center;
     }
     .desc-row input[type="text"] {
       flex: 1;
-      padding: 6px;
+      padding: 7px 8px;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--line);
+      background: var(--paper);
       font-size: 0.78em;
       min-width: 0;
     }
+    .desc-row input[type="text"]:focus { border-color: var(--rust); }
     .desc-row button {
-      background: #f4a261;
-      color: white;
+      background: var(--apricot-deep);
+      color: var(--paper);
       border: none;
       border-radius: 6px;
-      padding: 6px 8px;
+      padding: 7px 9px;
       cursor: pointer;
       font-size: 0.78em;
       flex-shrink: 0;
+      transition: background 0.15s;
     }
-    .desc-row button:hover { background: #e08c45; }
-    .desc-row button.guardado { background: #2a9d8f; }
-    .desc-row button.star { background: #6d9dc5; }
-    .desc-row button.star:hover { background: #5a89b0; }
+    .desc-row button:hover { background: #7d3d17; }
+    .desc-row button.guardado { background: var(--sage-deep); }
+    .desc-row button.star { background: var(--mustard-deep); }
+    .desc-row button.star:hover { background: #7a530c; }
 
     .preset-row {
       padding: 0 8px 6px;
     }
     .preset-row select {
       width: 100%;
-      padding: 5px;
+      padding: 6px;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--line);
+      background: var(--paper);
       font-size: 0.72em;
-      color: #555;
+      color: var(--ink-soft);
       box-sizing: border-box;
     }
 
     /* --- Tarjetas de comida extra --- */
     .extra-card h2 {
-      background: #6d9dc5;
+      background: var(--sage-deep);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -323,62 +418,114 @@
     .extra-tag {
       font-size: 0.7em;
       font-weight: normal;
-      background: rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.22);
       padding: 2px 8px;
       border-radius: 10px;
     }
     .btn-eliminar-extra {
       display: block;
       width: 100%;
-      padding: 7px;
-      background: #e76f51;
-      color: white;
+      padding: 8px;
+      background: var(--danger);
+      color: var(--paper);
       border: none;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
       font-size: 0.78em;
+      transition: background 0.15s;
     }
-    .btn-eliminar-extra:hover { background: #d15c3e; }
+    .btn-eliminar-extra:hover { background: #7c2f24; }
 
-    /* --- Barra de botones (abren ventanas modales) --- */
-    .action-bar {
+    /* --- Menú de acciones (hamburguesa) --- */
+    .brand-row {
       display: flex;
-      gap: 8px;
-      max-width: 640px;
-      margin: 16px auto;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      max-width: 900px;
+      margin: 0 auto;
     }
-    .action-btn {
-      flex: 1;
-      border: none;
+    .menu-wrap { position: relative; flex-shrink: 0; }
+    .menu-btn {
+      background: rgba(246,238,220,0.14);
+      border: 1px solid rgba(246,238,220,0.4);
+      color: var(--paper);
+      width: 42px;
+      height: 42px;
       border-radius: 10px;
-      padding: 12px 6px;
-      font-size: 0.85em;
-      font-weight: bold;
-      color: white;
+      font-size: 1.25em;
+      line-height: 1;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
     }
-    .action-btn .badge {
-      display: inline-block;
-      background: rgba(255,255,255,0.3);
+    .menu-btn:hover, .menu-btn[aria-expanded="true"] { background: rgba(246,238,220,0.28); }
+
+    .quick-menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      width: 250px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 970;
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .quick-menu.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .quick-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      border: none;
+      border-left: 4px solid transparent;
+      background: transparent;
+      padding: 11px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.92em;
+      color: var(--ink);
+      text-align: left;
+      transition: background 0.12s;
+    }
+    .quick-menu-item:hover { background: var(--paper-deep); }
+    .quick-menu-item .qmi-icon { font-size: 1.15em; flex-shrink: 0; }
+    .quick-menu-item .qmi-label { flex: 1; }
+    .quick-menu-item .badge {
+      background: var(--sage-deep);
+      color: var(--paper);
       border-radius: 10px;
-      padding: 0 6px;
-      margin-left: 4px;
-      font-size: 0.9em;
+      padding: 1px 8px;
+      font-size: 0.8em;
+      flex-shrink: 0;
     }
-    #btn-open-activity { background: #588157; }
-    #btn-open-activity:hover { background: #466944; }
-    #btn-open-extra { background: #6d9dc5; }
-    #btn-open-extra:hover { background: #5a89b0; }
-    #btn-open-pdf { background: #b5651d; }
-    #btn-open-pdf:hover { background: #97531a; }
+    #btn-open-activity { border-left-color: var(--sage-deep); }
+    #btn-open-extra { border-left-color: var(--apricot-deep); }
+    #btn-open-pdf { border-left-color: #4A3524; }
 
     /* --- Ventanas modales genéricas --- */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.55);
+      background: rgba(35, 25, 15, 0.55);
       z-index: 950;
       align-items: center;
       justify-content: center;
@@ -387,24 +534,34 @@
     }
     .modal-overlay.open { display: flex; }
     .modal-box {
-      background: white;
-      border-radius: 14px;
+      background: var(--card);
+      border-radius: 18px;
+      border-top: 5px solid var(--rust);
       max-width: 480px;
       width: 100%;
       max-height: 88vh;
       overflow-y: auto;
-      padding: 22px 20px 20px;
+      padding: 24px 20px 20px;
       position: relative;
       box-sizing: border-box;
       text-align: left;
     }
+    #modal-activity .modal-box { border-top-color: var(--sage-deep); }
+    #modal-extra .modal-box { border-top-color: var(--apricot-deep); }
+    #modal-pdf .modal-box { border-top-color: #4A3524; }
+    @media (min-width: 860px) {
+      #modal-activity .modal-box, #modal-extra .modal-box, #modal-pdf .modal-box {
+        border-top-width: 4px;
+      }
+    }
     .modal-box h3 {
       margin: 0 0 14px;
       text-align: center;
-      font-size: 1.1em;
+      font-size: 1.15em;
       padding-right: 24px;
+      color: var(--ink);
     }
-    .modal-box p { margin-top: 0; font-size: 0.9em; color: #555; }
+    .modal-box p { margin-top: 0; font-size: 0.9em; color: var(--ink-soft); line-height: 1.5; }
     .modal-close {
       position: absolute;
       top: 10px;
@@ -413,10 +570,10 @@
       border: none;
       font-size: 1.7em;
       line-height: 1;
-      color: #999;
+      color: var(--ink-soft);
       cursor: pointer;
     }
-    .modal-close:hover { color: #555; }
+    .modal-close:hover { color: var(--ink); }
 
     /* --- Contenido del modal "agregar comida extra" --- */
     .extra-form {
@@ -432,45 +589,50 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      color: var(--ink-soft);
     }
     .extra-form select,
     .extra-form input[type="text"] {
       padding: 8px;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--line);
+      background: var(--paper);
       font-size: 1em;
+      color: var(--ink);
     }
     .modal-box input[type="file"] { display: none; }
     .extra-file-label {
       display: inline-block;
-      background: #eee;
-      color: #333;
+      background: var(--paper-deep);
+      color: var(--ink);
       padding: 10px 16px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.9em;
+      transition: background 0.15s;
     }
-    .extra-file-label:hover { background: #e2e2e2; }
+    .extra-file-label:hover { background: var(--line-soft); }
     .extra-file-name {
       font-size: 0.85em;
-      color: #555;
+      color: var(--ink-soft);
       margin: 8px 0;
       word-break: break-all;
     }
     #btn-extra-guardar {
-      background: #6d9dc5;
-      color: white;
+      background: var(--apricot-deep);
+      color: var(--paper);
       border: none;
       border-radius: 8px;
       padding: 12px 24px;
       font-size: 1em;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 700;
       display: block;
       margin: 10px auto 0;
+      transition: background 0.15s;
     }
-    #btn-extra-guardar:hover { background: #5a89b0; }
-    #btn-extra-guardar:disabled { background: #ccc; cursor: wait; }
+    #btn-extra-guardar:hover { background: #7d3d17; }
+    #btn-extra-guardar:disabled { background: var(--line); cursor: wait; }
 
     /* --- Contenido del modal "actividad física" --- */
     .activity-list {
@@ -481,25 +643,25 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      background: #eef5ea;
+      background: var(--paper-deep);
       border-radius: 8px;
-      padding: 8px 12px;
+      padding: 9px 12px;
       margin-bottom: 8px;
       font-size: 0.9em;
     }
-    .activity-item .texto { color: #333; overflow-wrap: anywhere; }
-    .activity-item .texto b { color: #466944; }
+    .activity-item .texto { color: var(--ink); overflow-wrap: anywhere; }
+    .activity-item .texto b { color: var(--sage-deep); }
     .activity-item button {
       background: none;
       border: none;
-      color: #e76f51;
+      color: var(--danger);
       cursor: pointer;
       font-size: 1.05em;
       flex-shrink: 0;
     }
     .activity-empty {
       font-size: 0.85em;
-      color: #999;
+      color: var(--ink-soft);
       text-align: center;
       padding: 4px 0 8px;
     }
@@ -514,9 +676,11 @@
       min-width: 140px;
       padding: 9px;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--line);
+      background: var(--paper);
       font-size: 0.95em;
       box-sizing: border-box;
+      color: var(--ink);
     }
     .activity-actions {
       display: flex;
@@ -525,27 +689,29 @@
       margin-top: 4px;
     }
     #btn-activity-add {
-      background: #588157;
-      color: white;
+      background: var(--sage-deep);
+      color: var(--paper);
       border: none;
       border-radius: 8px;
       padding: 10px 20px;
       font-size: 0.95em;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
+      transition: background 0.15s;
     }
-    #btn-activity-add:hover { background: #466944; }
-    #btn-activity-add:disabled { background: #ccc; cursor: wait; }
+    #btn-activity-add:hover { background: #3c4728; }
+    #btn-activity-add:disabled { background: var(--line); cursor: wait; }
     #btn-activity-star {
-      background: #6d9dc5;
-      color: white;
+      background: var(--mustard-deep);
+      color: var(--paper);
       border: none;
       border-radius: 8px;
       padding: 10px 14px;
       font-size: 0.95em;
       cursor: pointer;
+      transition: background 0.15s;
     }
-    #btn-activity-star:hover { background: #5a89b0; }
+    #btn-activity-star:hover { background: #7a530c; }
 
     /* --- Contenido del modal "generar PDF" --- */
     .rango {
@@ -562,32 +728,36 @@
       flex-direction: column;
       gap: 4px;
       text-align: left;
+      color: var(--ink-soft);
     }
     .rango input[type="date"] {
       padding: 8px;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
     }
     #btn-pdf {
-      background: #2a9d8f;
-      color: white;
+      background: #4A3524;
+      color: var(--paper);
       border: none;
       border-radius: 8px;
       padding: 12px 24px;
       font-size: 1em;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 700;
       display: block;
       margin: 0 auto;
+      transition: background 0.15s;
     }
-    #btn-pdf:hover { background: #21867a; }
-    #btn-pdf:disabled { background: #ccc; cursor: wait; }
+    #btn-pdf:hover { background: #382713; }
+    #btn-pdf:disabled { background: var(--line); cursor: wait; }
     .pdf-msg {
       margin-top: 10px;
       font-size: 0.85em;
       min-height: 1em;
       text-align: center;
-      color: #e63946;
+      color: var(--danger);
     }
   </style>
 </head>
@@ -596,7 +766,8 @@
   <!-- Pantalla para ingresar el usuario -->
   <div class="login-screen" id="pantalla-usuario">
     <div class="login-box">
-      <h1 style="margin-top:0">🍽️ Comidas del Día</h1>
+      <span class="brand-mark" aria-hidden="true">🍽️</span>
+      <h1>Comidas del día</h1>
       <p>Elegí un nombre de usuario. Va a quedar guardado en este link para
         que solo vos (y quien compartas el link) vean estas fotos.</p>
       <input type="text" id="input-usuario" placeholder="ej: martin83" maxlength="30" autocomplete="off">
@@ -607,13 +778,37 @@
 
   <!-- App principal (oculta hasta tener usuario) -->
   <div id="app" style="display:none">
-    <h1>🍽️ Comidas del Día</h1>
-
-    <div class="user-bar">
-      Usuario: <b id="user-label"></b>
-      <button id="btn-compartir">🔗 Compartir mi link</button>
-      <button id="btn-cambiar-usuario">Cambiar de usuario</button>
-    </div>
+    <header class="app-header">
+      <div class="brand-row">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">🍽️</span>
+          <h1>Comidas del día</h1>
+        </div>
+        <div class="menu-wrap">
+          <button id="btn-menu" class="menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Abrir menú de acciones">☰</button>
+          <nav class="quick-menu" id="quick-menu">
+            <button id="btn-open-activity" class="quick-menu-item">
+              <span class="qmi-icon" aria-hidden="true">🏃</span>
+              <span class="qmi-label">Actividad física</span>
+              <span class="badge" id="activity-badge" style="display:none"></span>
+            </button>
+            <button id="btn-open-extra" class="quick-menu-item">
+              <span class="qmi-icon" aria-hidden="true">➕</span>
+              <span class="qmi-label">Comida extra</span>
+            </button>
+            <button id="btn-open-pdf" class="quick-menu-item">
+              <span class="qmi-icon" aria-hidden="true">📄</span>
+              <span class="qmi-label">Generar PDF</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+      <div class="user-bar">
+        <span class="user-chip">Usuario: <b id="user-label"></b></span>
+        <button id="btn-compartir">🔗 Compartir mi link</button>
+        <button id="btn-cambiar-usuario">Cambiar de usuario</button>
+      </div>
+    </header>
 
     <div class="layout">
       <aside class="sidebar" id="sidebar">
@@ -700,21 +895,15 @@
 
       <div class="main-col">
         <div class="day-nav">
-          <button id="btn-prev">‹ Día anterior</button>
-          <div>
+          <button id="btn-prev" aria-label="Día anterior">‹</button>
+          <div class="fecha-wrap">
             <div class="fecha" id="fecha-label"></div>
             <input type="date" id="fecha-picker">
           </div>
-          <button id="btn-next">Día siguiente ›</button>
+          <button id="btn-next" aria-label="Día siguiente">›</button>
         </div>
 
         <div class="grid" id="grid"></div>
-
-        <div class="action-bar" id="action-bar">
-          <button id="btn-open-activity">🏃 Actividad<span class="badge" id="activity-badge" style="display:none"></span></button>
-          <button id="btn-open-extra">➕ Extra</button>
-          <button id="btn-open-pdf">📄 PDF</button>
-        </div>
       </div>
     </div>
   </div>
@@ -915,7 +1104,7 @@
 
     function crearCardBase(key, nombre) {
       const card = document.createElement("div");
-      card.className = "card";
+      card.className = `card card-${key}`;
       const descActual = descripcionesActuales[key] || "";
       card.innerHTML = `
         <h2>${nombre}</h2>
@@ -1168,6 +1357,24 @@
       renderDia();
     });
 
+    // ---------------- Menú de acciones (hamburguesa) ----------------
+    const btnMenu = document.getElementById("btn-menu");
+    const quickMenu = document.getElementById("quick-menu");
+    function toggleMenu(forzar) {
+      const abrir = forzar !== undefined ? forzar : !quickMenu.classList.contains("open");
+      quickMenu.classList.toggle("open", abrir);
+      btnMenu.setAttribute("aria-expanded", abrir ? "true" : "false");
+    }
+    btnMenu.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+    document.addEventListener("click", (e) => {
+      if (quickMenu.classList.contains("open") && !quickMenu.contains(e.target) && e.target !== btnMenu) {
+        toggleMenu(false);
+      }
+    });
+
     // ---------------- Ventanas modales (actividad / extra / pdf) ----------------
     function abrirModal(id) {
       document.getElementById(id).classList.add("open");
@@ -1185,15 +1392,23 @@
     });
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
+      toggleMenu(false);
       document.querySelectorAll(".modal-overlay.open").forEach((overlay) => cerrarModal(overlay.id));
     });
 
-    document.getElementById("btn-open-activity").addEventListener("click", () => abrirModal("modal-activity"));
+    document.getElementById("btn-open-activity").addEventListener("click", () => {
+      abrirModal("modal-activity");
+      toggleMenu(false);
+    });
     document.getElementById("btn-open-extra").addEventListener("click", () => {
       abrirModal("modal-extra");
       actualizarSelectExtraPreset();
+      toggleMenu(false);
     });
-    document.getElementById("btn-open-pdf").addEventListener("click", () => abrirModal("modal-pdf"));
+    document.getElementById("btn-open-pdf").addEventListener("click", () => {
+      abrirModal("modal-pdf");
+      toggleMenu(false);
+    });
 
     // ---------------- Agregar comida extra ----------------
     const extraAfter = document.getElementById("extra-after");
@@ -1391,7 +1606,7 @@
 
     btnPdf.addEventListener("click", async () => {
       pdfMsg.textContent = "";
-      pdfMsg.style.color = "#e63946";
+      pdfMsg.style.color = "#9B3A2C";
 
       if (!pdfDesde.value || !pdfHasta.value) {
         pdfMsg.textContent = "Elegí ambas fechas.";
