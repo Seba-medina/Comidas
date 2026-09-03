@@ -54,6 +54,7 @@ web y el PDF:
 - **Generación de PDF:** librería `pdf-lib` (del lado del servidor, en una
   Netlify Function), con `@pdf-lib/fontkit` para poder incrustar una fuente
   real (DM Serif Display) en vez de usar solo las fuentes estándar del PDF.
+- **Gráficos Avanzados:** `Chart.js` inyectado vía CDN público para dibujar gráficos nativos de línea o barras al abrir el panel de progreso en dispositivos clientes.
 - **Multiusuario y Autenticación:** Cada cuenta puede visualizarse de forma pública a través del parámetro de URL `?u=nombre_usuario` entrando en un "Modo Lectura". Para poder modificar, agregar comidas o generar PDFs se requiere iniciar sesión en la cuenta con su propia **contraseña**.
 
 ## Estructura de archivos
@@ -124,6 +125,8 @@ netlify/functions/
 - Puntajes de un día: `usuario:fecha:puntajes` → JSON
   `{ desayuno, almuerzo, merienda, cena, extras: { extraId: n } }`, cada
   valor es un número 1-5 (ausente = no puntuada esa comida)
+- Métricas Biométricas Diarias: `usuario:fecha:metricas` → JSON
+  `{ peso, sueno, agua, pasos, energia }`, donde todos son numéricos y opcionales.
 
 `usuario` valida contra `/^[a-zA-Z0-9_-]{3,30}$/`. `fecha` es `YYYY-MM-DD`.
 
@@ -217,6 +220,10 @@ estrellas (tocar la misma estrella otra vez borra el puntaje). Reglas:
     reglas.
 18. Autenticación, "Modo Lectura" público y contraseñas. Posibilita separar la app entre dueños de la cuenta con posibilidad para editar la información y el resto (familiares, amigos o la nutricionista) que pueden observar todos los datos al enviarles el link, pero les desaparecen las herramientas de edición.
 19. Panel invisible "admin" para gestionar usuarios, acceder a cuentas y ver listados.
+20. Mejoras técnicas y estéticas importantes al **Motor de PDF**:
+    - **Fetch en Paralelo:** Uso de `Promise.all` para descargar imágenes agrupadamente. Antes, con un bucle secuencial, generar muchos días hacía que se superaran los 10 segundos gratuitos de AWS Lambda en Netlify, provocando caídas opacas como `unexpected end of JSON input`.
+    - **Manejo de errores seguro (Try/Catch global):** Todo el endpoint de generación procesado en bloques seguros que devuelven JSON amigable, y eliminación de la variable `__dirname` nativa por colisión e inyecciones de los propios bundlers de esbuild/Netlify.
+    - **Estética fotográfica:** Implementación algorítmica y calculada para imitar **object-fit: cover**, encuadrando mediante el uso de operadores avanzados de clipping mask de `pdf-lib` la imagen, logrando el mismo formato cuadrado profesional en base a cualquier foto original (vertical o apaisada).
 
 ## Limitaciones conocidas / decisiones tomadas
 

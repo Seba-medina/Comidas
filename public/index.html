@@ -24,6 +24,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap"
     rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  rel="stylesheet">
   <style>
     :root {
       --paper: #F6EEDC;
@@ -111,6 +113,19 @@
     body.read-only-mode .desc-row input {
       display: none !important;
       pointer-events: none;
+    }
+
+    body.read-only-mode #btn-met-guardar {
+      display: none !important;
+    }
+
+    body.read-only-mode .card-metrics input {
+      pointer-events: none;
+      border-color: transparent !important;
+      background: transparent !important;
+      color: var(--ink-deep) !important;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     /* --- Pantalla de usuario --- */
@@ -1361,6 +1376,39 @@
               <span><i class="dot dot-rojo"></i> Mal</span>
               <span><i class="dot dot-gris"></i> Sin datos</span>
             </div>
+
+            <hr style="border:0; border-top:1px solid var(--line); margin:24px 0;">
+            <h3 style="font-family:var(--font-heading); margin-bottom:12px; color:var(--rust-deep);">Estadísticas
+              Avanzadas (Últimos 30 días)</h3>
+
+            <div id="stats-loading" style="display:none; color:var(--ink-soft); font-size:14px; text-align:center;">
+              Cargando métricas...</div>
+            <div id="stats-content" style="display:none;">
+              <h4 style="margin-bottom:8px; font-weight:600; color:var(--ink-soft);">Puntajes por Comida</h4>
+              <table
+                style="width:100%; border-collapse:collapse; margin-bottom:24px; font-size:13px; text-align:center;">
+                <thead>
+                  <tr style="border-bottom:1px solid var(--line); color:var(--ink-soft);">
+                    <th style="padding:4px 0;"></th>
+                    <th>5⭐</th>
+                    <th>4⭐</th>
+                    <th>3⭐</th>
+                    <th>2⭐</th>
+                    <th>1⭐</th>
+                  </tr>
+                </thead>
+                <tbody id="stats-breakdown"></tbody>
+              </table>
+
+              <h4 style="margin-bottom:8px; font-weight:600; color:var(--ink-soft);">Evolución de Peso (kg)</h4>
+              <canvas id="chart-peso" height="180" style="margin-bottom:24px; width:100%;"></canvas>
+
+              <h4 style="margin-bottom:8px; font-weight:600; color:var(--ink-soft);">Horas de Sueño</h4>
+              <canvas id="chart-sueno" height="180" style="margin-bottom:24px; width:100%;"></canvas>
+
+              <h4 style="margin-bottom:8px; font-weight:600; color:var(--ink-soft);">Niveles de Energía (1 a 5)</h4>
+              <canvas id="chart-energia" height="150" style="width:100%;"></canvas>
+            </div>
           </div>
         </div>
       </aside>
@@ -1622,6 +1670,7 @@
     // ---------------- Comidas (con extras intercaladas) ----------------
     let extrasActuales = [];
     let descripcionesActuales = {};
+    let metricasActuales = {};
     let presetsActuales = { desayuno: [], almuerzo: [], merienda: [], cena: [] };
     let actividadesActuales = [];
     let puntajesActuales = { extras: {} };
@@ -1681,11 +1730,12 @@
       // Cada fetch se resuelve de forma independiente: si uno falla (por
       // ejemplo /api/scores todavía no está desplegado), no debe borrar los
       // datos de los demás (extras, descripciones, actividades).
-      const [resExtras, resDesc, resAct, resScores] = await Promise.all([
+      const [resExtras, resDesc, resAct, resScores, resMetricas] = await Promise.all([
         fetch(`/api/extras?${qs}`).catch(() => null),
         fetch(`/api/descriptions?${qs}`).catch(() => null),
         fetch(`/api/activities?${qs}`).catch(() => null),
         fetch(`/api/scores?${qs}`).catch(() => null),
+        fetch(`/api/metrics?${qs}`).catch(() => null),
       ]);
 
       try {
@@ -1715,6 +1765,13 @@
         if (!puntajesActuales.extras) puntajesActuales.extras = {};
       } catch (e) {
         puntajesActuales = { extras: {} };
+      }
+
+      try {
+        const dataMetricas = await resMetricas.json();
+        metricasActuales = dataMetricas.metricas || {};
+      } catch (e) {
+        metricasActuales = {};
       }
 
       buildGrid();
@@ -1902,6 +1959,70 @@
       }
     }
 
+    function crearCardMetricas() {
+      const card = document.createElement("div");
+      card.className = "card card-metrics";
+      card.style.background = "var(--paper-deep)";
+      card.style.border = "1px solid var(--sage-deep)";
+      card.innerHTML = `
+        <h2 style="background:var(--sage-deep); color:white; padding:12px; margin:-16px -16px 16px; border-radius:10px 10px 0 0;">Métricas Diarias</h2>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+          <div>
+            <label style="display:block; font-size:0.9em; font-weight:600; color:var(--ink-soft); margin-bottom:4px;">Peso (kg)</label>
+            <input type="number" id="inp-peso" step="0.1" value="${metricasActuales.peso !== null && metricasActuales.peso !== undefined ? metricasActuales.peso : ''}" style="width:100%; border-radius:5px; padding:8px; border:1px solid var(--line);">
+          </div>
+          <div>
+            <label style="display:block; font-size:0.9em; font-weight:600; color:var(--ink-soft); margin-bottom:4px;">Sueño (hs)</label>
+            <input type="number" id="inp-sueno" step="0.5" value="${metricasActuales.sueno !== null && metricasActuales.sueno !== undefined ? metricasActuales.sueno : ''}" style="width:100%; border-radius:5px; padding:8px; border:1px solid var(--line);">
+          </div>
+          <div>
+            <label style="display:block; font-size:0.9em; font-weight:600; color:var(--ink-soft); margin-bottom:4px;">Agua (vasos)</label>
+            <input type="number" id="inp-agua" step="1" value="${metricasActuales.agua !== null && metricasActuales.agua !== undefined ? metricasActuales.agua : ''}" style="width:100%; border-radius:5px; padding:8px; border:1px solid var(--line);">
+          </div>
+          <div>
+            <label style="display:block; font-size:0.9em; font-weight:600; color:var(--ink-soft); margin-bottom:4px;">Pasos</label>
+            <input type="number" id="inp-pasos" step="100" value="${metricasActuales.pasos !== null && metricasActuales.pasos !== undefined ? metricasActuales.pasos : ''}" style="width:100%; border-radius:5px; padding:8px; border:1px solid var(--line);">
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="display:block; font-size:0.9em; font-weight:600; color:var(--ink-soft); margin-bottom:4px;">Energía de hoy (1 a 5)</label>
+          <input type="number" id="inp-energia" min="1" max="5" value="${metricasActuales.energia !== null && metricasActuales.energia !== undefined ? metricasActuales.energia : ''}" style="width:100%; border-radius:5px; padding:8px; border:1px solid var(--line);">
+        </div>
+        <button id="btn-met-guardar" style="width:100%; margin-top:16px; background:var(--sage-deep); color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">💾 Guardar métricas</button>
+      `;
+      card.querySelector("#btn-met-guardar").addEventListener("click", async () => {
+        const p = parseFloat(document.getElementById("inp-peso").value);
+        const s = parseFloat(document.getElementById("inp-sueno").value);
+        const a = parseInt(document.getElementById("inp-agua").value, 10);
+        const px = parseInt(document.getElementById("inp-pasos").value, 10);
+        const e = parseInt(document.getElementById("inp-energia").value, 10);
+        const btn = document.getElementById("btn-met-guardar");
+        btn.disabled = true;
+        btn.textContent = "Guardando...";
+        try {
+          const res = await originalFetch("/api/set-metrics", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              usuario, fecha: toISO(currentDate),
+              peso: isNaN(p) ? null : p,
+              sueno: isNaN(s) ? null : s,
+              agua: isNaN(a) ? null : a,
+              pasos: isNaN(px) ? null : px,
+              energia: isNaN(e) ? null : e
+            })
+          });
+          if (!res.ok) throw new Error();
+          btn.textContent = "✅ ¡Listo!";
+          setTimeout(() => { btn.disabled = false; btn.textContent = "💾 Guardar métricas"; }, 2000);
+        } catch (err) {
+          btn.textContent = "Error";
+          setTimeout(() => { btn.disabled = false; btn.textContent = "💾 Guardar métricas"; }, 2000);
+        }
+      });
+      return card;
+    }
+
     function buildGrid() {
       grid.innerHTML = "";
       for (const [key, nombre] of Object.entries(COMIDAS)) {
@@ -1911,6 +2032,7 @@
           grid.appendChild(crearCardExtra(extra));
         }
       }
+      grid.appendChild(crearCardMetricas());
       cargarImagenes();
     }
 
@@ -2080,7 +2202,67 @@
       abrirModal("modal-progreso");
       toggleMenu(false);
       cargarProgreso();
+      cargarEstadisticasAvanzadas();
     });
+
+    let chartPeso = null, chartSueno = null, chartEnergia = null;
+    async function cargarEstadisticasAvanzadas() {
+      document.getElementById("stats-loading").style.display = "block";
+      document.getElementById("stats-content").style.display = "none";
+      try {
+        const hasta = toISO(currentDate);
+        const res = await originalFetch(`/api/stats?usuario=\${encodeURIComponent(usuario)}&hasta=\${hasta}&dias=30`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        document.getElementById("stats-loading").style.display = "none";
+        document.getElementById("stats-content").style.display = "block";
+
+        const bd = data.breakdown || {};
+        const tbody = document.getElementById("stats-breakdown");
+        tbody.innerHTML = ["desayuno", "almuerzo", "merienda", "cena"].map(k => `
+            <tr style="border-bottom:1px solid var(--paper-stripe);">
+               <td style="text-align:left; font-weight:bold; color:var(--ink); padding:6px 0;">\${k.charAt(0).toUpperCase() + k.slice(1)}</td>
+               <td style="color:var(--sage-deep); font-weight:bold;">\${bd[k]?.[5] || '-'}</td>
+               <td style="color:var(--sage-deep);">\${bd[k]?.[4] || '-'}</td>
+               <td style="color:var(--mustard-deep);">\${bd[k]?.[3] || '-'}</td>
+               <td style="color:var(--danger);">\${bd[k]?.[2] || '-'}</td>
+               <td style="color:var(--danger);">\${bd[k]?.[1] || '-'}</td>
+            </tr>
+         `).join("");
+
+        function createChart(ctxId, labelStr, color, dataset, typeStr = "line") {
+          const ctx = document.getElementById(ctxId).getContext("2d");
+          return new Chart(ctx, {
+            type: typeStr,
+            data: {
+              datasets: [{
+                label: labelStr,
+                data: dataset,
+                borderColor: color,
+                backgroundColor: color + "60",
+                borderWidth: 2,
+                tension: 0.3,
+                spanGaps: true
+              }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'category' } }, plugins: { legend: { display: false } } }
+          });
+        }
+
+        if (chartPeso) chartPeso.destroy();
+        if (chartSueno) chartSueno.destroy();
+        if (chartEnergia) chartEnergia.destroy();
+
+        const mapData = (arr) => arr.map(a => ({ x: a.x.substring(5), y: a.y }));
+        chartPeso = createChart("chart-peso", "Peso", "#9C4C1E", mapData(data.seriePeso || []));
+        chartSueno = createChart("chart-sueno", "Horas de Sueño", "#4A5733", mapData(data.serieSueno || []));
+        chartEnergia = createChart("chart-energia", "Energía", "#96690F", mapData(data.serieEnergia || []), "bar");
+
+      } catch (e) {
+        document.getElementById("stats-loading").textContent = "Error cargando métricas.";
+      }
+    }
 
     // ---------------- Mi progreso (racha + calendario) ----------------
     const MESES_LARGO = [
