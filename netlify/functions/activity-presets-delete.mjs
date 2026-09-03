@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { verificarAuth } from "./auth-utils.mjs";
 
 const USUARIO_REGEX = /^[a-zA-Z0-9_-]{3,30}$/;
 
@@ -17,6 +18,14 @@ export default async (req) => {
   try {
     const body = await req.json();
     const usuario = body?.usuario;
+
+    const authCheck = await verificarAuth(req, usuario);
+    if (!authCheck.ok) {
+      return new Response(JSON.stringify({ error: authCheck.error }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     const texto = body?.texto;
 
     if (!usuario || !USUARIO_REGEX.test(usuario)) return json400("Usuario inválido");

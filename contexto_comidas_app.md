@@ -1,0 +1,253 @@
+# Contexto del proyecto: "Comidas del Día"
+
+Pegá este texto completo al inicio de una conversación nueva con Claude antes
+de pedir cualquier cambio. Si podés, adjuntá también el .zip con el código
+actual del proyecto (así Claude puede leer los archivos reales en vez de
+guiarse solo por esta descripción).
+
+---
+
+## Qué es
+
+Una página web donde cada usuario sube una foto de cada comida del día
+(Desayuno, Almuerzo, Merienda, Cena), puede navegar entre días, agregar
+"comidas extra" (fuera de esas 4), escribir una descripción de ingredientes
+por foto (con opciones guardadas reutilizables), registrar actividad física
+del día, y generar un PDF con un rango de fechas para mandarle a su
+nutricionista. Está pensada para uso desde el celular, con instalación como
+acceso directo (PWA).
+
+## Identidad visual
+
+Estética cálida y hogareña ("libreta de cocina"), consistente entre la app
+web y el PDF:
+
+- **Paleta:** fondo papel/crema, tinta marrón cálido para texto, terracota
+  como color principal. Cada una de las 4 comidas tiene su propio color de
+  acento (mostaza=desayuno, terracota=almuerzo, damasco=merienda,
+  ciruela=cena), y las comidas extra y la actividad física usan verde
+  salvia. Estos mismos colores se repiten en la web (cabecera de cada
+  tarjeta) y en el PDF (cabecera de cada recuadro de comida).
+- **Tipografía en la web:** Fraunces (serif, para títulos y nombres de
+  comida) + Karla (sans, para el resto), cargadas desde Google Fonts.
+- **Tipografía en el PDF:** DM Serif Display, incrustada de verdad en el PDF
+  (no es una fuente estándar) para los títulos de cada día; el resto del
+  texto usa Helvetica (fuente estándar, liviana).
+- **Navegación de acciones:** un botón ☰ en el header abre un menú
+  desplegable con las 4 acciones (Actividad física, Comida extra, Generar
+  PDF, Mi progreso). No hay barra de botones fija ni panel lateral siempre
+  visible — el comportamiento es el mismo en cualquier tamaño de pantalla.
+- **Sistema de puntuación:** cada comida (base y extra) se puntúa del 1 al 5
+  con estrellas, tanto en la web como reflejado en el PDF (puntitos de
+  colores, ya que las fuentes del PDF no pueden mostrar el símbolo ★). Ver
+  la sección "Sistema de puntuación" más abajo para el detalle completo.
+
+## Stack técnico
+
+- **Hosting:** Netlify (plan gratuito).
+- **Frontend:** un único archivo HTML estático con CSS y JavaScript vanilla
+  embebido (sin frameworks, sin build step).
+- **Backend:** Netlify Functions en JavaScript (no Python — Netlify no
+  soporta bien Python para funciones persistentes).
+- **Almacenamiento:** Netlify Blobs (key-value store propio de Netlify,
+  gratuito, persistente).
+- **Generación de PDF:** librería `pdf-lib` (del lado del servidor, en una
+  Netlify Function), con `@pdf-lib/fontkit` para poder incrustar una fuente
+  real (DM Serif Display) en vez de usar solo las fuentes estándar del PDF.
+- **Multiusuario:** por parámetro de URL `?u=nombre_usuario`, sin contraseña
+  real (es "seguridad por oscuridad" — cada quien tiene su propio link).
+
+## Estructura de archivos
+
+```
+netlify.toml                     → config: publish="public", functions="netlify/functions",
+                                    y functions.included_files para empaquetar la fuente
+                                    del PDF junto con la función
+package.json                     → dependencias: @netlify/blobs, pdf-lib, @pdf-lib/fontkit
+public/
+  index.html                     → toda la app (HTML+CSS+JS)
+  manifest.json                  → manifest PWA (ícono, nombre, modo standalone, colores)
+  icons/
+    icon-192.png, icon-512.png, apple-touch-icon.png   → ícono rediseñado (plato+cubiertos
+                                                           en la paleta cálida actual)
+netlify/functions/
+  upload.mjs                    → POST: sube foto de una de las 4 comidas base
+  image.mjs                     → GET: sirve la foto de una comida base
+  extras.mjs                    → GET: lista las comidas "extra" de un día
+  extra-upload.mjs               → POST: sube una foto de comida extra
+  extra-delete.mjs               → POST: elimina una comida extra
+  extra-edit.mjs                 → POST: edita la descripción de una comida extra
+  extra-image.mjs                → GET: sirve la foto de una comida extra
+  descriptions.mjs               → GET: descripciones de las 4 comidas base de un día
+  set-description.mjs            → POST: guarda la descripción de una comida base
+  presets.mjs                    → GET: opciones guardadas por comida (reutilizables)
+  presets-add.mjs                → POST: agrega una opción guardada
+  presets-delete.mjs             → POST: elimina una opción guardada
+  activities.mjs                 → GET: lista la actividad física de un día
+  activity-add.mjs               → POST: agrega una actividad física a un día
+  activity-delete.mjs            → POST: elimina una actividad física
+  activity-presets.mjs           → GET: opciones guardadas de actividad física
+  activity-presets-add.mjs       → POST: agrega una opción guardada de actividad
+  activity-presets-delete.mjs    → POST: elimina una opción guardada de actividad
+  set-score.mjs                  → POST: guarda el puntaje (1-5) de una comida base o extra
+  scores.mjs                     → GET: puntajes de un día
+  progreso.mjs                   → GET: racha actual + calendario de un mes (colores por día)
+  generate-pdf.mjs               → GET: genera el PDF de un rango de fechas
+  assets/fonts/
+    DMSerifDisplay-Regular.ttf   → fuente incrustada en el PDF (títulos de cada día)
+    DMSerifDisplay-Italic.ttf    → variante itálica (texto "(continúa)", "Sin foto")
+    OFL.txt                     → licencia de la fuente (Open Font License)
+```
+
+## Modelo de datos (claves en Netlify Blobs, todas en el store "comidas")
+
+- Foto de comida base: `usuario:fecha:comida`
+  (ej: `martin83:2026-09-01:desayuno`) → el binario de la imagen (JPG/PNG),
+  con metadata `contentType`.
+- Descripciones de las 4 comidas base de un día:
+  `usuario:fecha:descripciones` → JSON `{ desayuno, almuerzo, merienda, cena }`
+- Índice de comidas extra de un día: `usuario:fecha:extras` → JSON
+  `[{ id, after, label, desc }]` (`after` = después de qué comida base va)
+- Foto de comida extra: `usuario:fecha:extra:ID` → binario de imagen
+- Opciones guardadas (presets) de comida del usuario: `usuario:presets` →
+  JSON `{ desayuno: [...], almuerzo: [...], merienda: [...], cena: [...] }`
+  (son globales del usuario, no por día)
+- Actividad física de un día: `usuario:fecha:actividades` → JSON
+  `[{ id, tipo, nota }]`
+- Opciones guardadas (presets) de actividad física del usuario:
+  `usuario:presets-actividad` → JSON `[...]` (array de strings, global del
+  usuario)
+- Puntajes de un día: `usuario:fecha:puntajes` → JSON
+  `{ desayuno, almuerzo, merienda, cena, extras: { extraId: n } }`, cada
+  valor es un número 1-5 (ausente = no puntuada esa comida)
+
+`usuario` valida contra `/^[a-zA-Z0-9_-]{3,30}$/`. `fecha` es `YYYY-MM-DD`.
+
+## Sistema de puntuación (racha + calendario)
+
+Cada una de las 4 comidas base y cada comida extra se puntúa del 1 al 5 con
+estrellas (tocar la misma estrella otra vez borra el puntaje). Reglas:
+
+- **Estado de un día:** se mira la peor comida puntuada ese día.
+  - 🟢 **verde**: todas las comidas puntuadas quedaron en 4 o 5.
+  - 🟡 **amarillo**: la peor puntuada fue un 3.
+  - 🔴 **rojo**: hay alguna comida en 1 o 2.
+  - ⚪ **gris**: no se puntuó ninguna comida ese día (no cuenta ni para bien
+    ni para mal).
+- **Racha:** cantidad de días **verdes** consecutivos yendo hacia atrás
+  desde hoy. Un día gris (sin puntuar) no corta la racha, pero tampoco la
+  hace avanzar — solo un día amarillo o rojo la corta. El cálculo tiene un
+  tope de 120 días hacia atrás (`MAX_DIAS_RACHA` en `progreso.mjs`) para no
+  escanear indefinidamente; si se llega al tope, la web muestra "120+".
+- **Calendario:** panel "🏆 Mi progreso" (en el menú ☰) con la racha arriba
+  y un calendario del mes con cada día coloreado según su estado, más
+  flechas para navegar entre meses.
+- **En el PDF:** cada comida muestra 5 puntitos (llenos hasta el puntaje) en
+  vez de estrellas de texto — las fuentes usadas en el PDF no tienen el
+  glyph ★, así que se dibujan como círculos con `page.drawCircle`. La página
+  de resumen final del PDF incluye un bloque "Cumplimiento del plan" con el
+  % de días verdes y el conteo de cada estado en el rango elegido.
+
+## Funcionalidades ya implementadas (en orden en que se fueron agregando)
+
+1. Página base con 4 comidas fijas (Desayuno/Almuerzo/Merienda/Cena), subida
+   de foto por comida, visible por cualquiera con el link.
+2. Migración de Flask/Python a Netlify (porque Netlify no corre Python de
+   forma persistente) usando Netlify Functions + Netlify Blobs.
+3. Grilla 2x2 fija, fotos más grandes en proporción 4:3, click en la foto
+   abre un lightbox (pantalla completa).
+4. Navegación entre días (flechas anterior/siguiente + selector de fecha).
+   Cada foto queda asociada a una fecha específica.
+5. Generación de PDF por rango de fechas: una hoja por día con las 4 fotos en
+   grilla 2x2 (botón que despliega el selector "Desde"/"Hasta").
+6. Corrección: el input de archivo no debía tener `capture="environment"`
+   (forzaba la cámara y no dejaba elegir de la galería).
+7. Sistema de usuarios por link (`?u=usuario`): cada usuario tiene su espacio
+   separado. El usuario se guarda en `localStorage` para no tener que
+   loguearse cada vez en el mismo dispositivo. Botón "Compartir mi link"
+   copia la URL con el usuario al portapapeles.
+8. Ícono de acceso directo / PWA: `manifest.json` + metatags + íconos
+   generados, para "Agregar a pantalla de inicio" en Android/iPhone.
+9. "Comidas extra": botón que permite agregar una foto fuera de las 4
+   comidas base, eligiendo "después de cuál" va (se intercala en la grilla y
+   en el PDF en el lugar correcto). Se puede eliminar.
+10. Descripción de texto por foto (para detallar ingredientes que no se ven
+    bien en la imagen), tanto en comidas base como extra. Aparece también en
+    el PDF, debajo del nombre de cada comida (con salto de línea automático,
+    máx. 2 líneas).
+11. Opciones guardadas (presets) por tipo de comida: botón ⭐ guarda la
+    descripción actual como opción reutilizable; aparece luego en un
+    desplegable para elegir sin volver a escribir. Las opciones son del
+    usuario y se comparten entre todos los días.
+12. Registro de actividad física por día (tipo + nota opcional), con sus
+    propias opciones guardadas (presets), listado y borrado. Aparece en la
+    app dentro del menú de acciones y en el PDF (línea debajo del título del
+    día, más una página de resumen al final con el conteo de cada actividad
+    en todo el rango de fechas del PDF).
+13. Rediseño visual completo de la app (paleta cálida "libreta de cocina",
+    tipografía Fraunces+Karla, tarjetas de comida con color propio por tipo,
+    ícono de la app rediseñado, manifest actualizado).
+14. Menú de acciones como botón hamburguesa (☰) en el header, con un
+    desplegable que reemplazó tanto la barra de botones fija de mobile como
+    el panel lateral siempre visible de pantallas anchas — comportamiento
+    único para cualquier tamaño de pantalla.
+15. Corrección de orientación de fotos en el PDF: las fotos de celular
+    (iPhone incluido) guardan la imagen "cruda" más un dato EXIF que indica
+    cuánto rotarla para verse derecha. Los navegadores lo respetan solo al
+    mostrar `<img>`, pero `pdf-lib` no — así que se agregó un parser EXIF
+    propio (sin dependencias externas) que lee ese dato y rota cada foto
+    matemáticamente antes de dibujarla en el PDF.
+16. Rediseño visual del PDF: misma paleta e identidad que la web (cabecera
+    de color por tipo de comida, numeral grande del día en tipografía serif
+    incrustada de verdad —DM Serif Display—, franja lateral de color,
+    numeración de página, página de resumen de actividad física con filas
+    alternadas). Si el archivo de fuente no estuviera disponible en
+    producción por algún motivo, el código cae automáticamente a una fuente
+    estándar en vez de romper la generación del PDF.
+17. Sistema de puntuación (1-5 estrellas) por comida, con racha de días
+    "verdes" consecutivos y un calendario mensual tipo mapa de calor
+    (panel "🏆 Mi progreso" en el menú ☰). El mismo criterio de estado del
+    día (verde/amarillo/rojo/gris) se usa también en el PDF: puntitos por
+    comida y un resumen de cumplimiento del rango en la última página. Ver
+    la sección "Sistema de puntuación" más arriba para el detalle de las
+    reglas.
+
+## Limitaciones conocidas / decisiones tomadas
+
+- Solo se aceptan fotos JPG o PNG (por la librería de generación de PDF).
+- El rango del PDF está limitado a 62 días por generación (para no exceder
+  el timeout de las funciones gratuitas de Netlify).
+- El sistema de usuarios NO es una autenticación real — cualquiera que
+  conozca el nombre de usuario puede verlo escribiéndolo en la URL. Sirve
+  para separar datos entre personas de confianza, no para datos sensibles.
+- No hay todavía una pantalla para eliminar opciones guardadas (presets) de
+  comida ni de actividad física desde la interfaz, aunque las funciones del
+  servidor (`presets-delete.mjs`, `activity-presets-delete.mjs`) ya existen
+  y se podrían conectar.
+- La corrección de orientación EXIF cubre las 4 orientaciones típicas de
+  cámara (normal, 180°, 90° y -90°); no cubre los casos "espejados" del
+  estándar EXIF (valores 2, 4, 5, 7), que en la práctica casi no aparecen en
+  fotos sacadas directo con la cámara del celular.
+- El cálculo de racha (`progreso.mjs`) escanea hacia atrás día por día desde
+  "hoy" con un tope de 120 días (`MAX_DIAS_RACHA`); una racha real más larga
+  se muestra como "120+" en vez del número exacto, para no alargar
+  demasiado el tiempo de respuesta de la función.
+- Un día sin ninguna comida puntuada (gris) no rompe la racha pero tampoco
+  la hace avanzar — es una decisión de diseño explícita, no un descuido.
+- El PDF depende de que `netlify.toml` incluya
+  `functions.included_files = ["netlify/functions/assets/**"]` para que el
+  archivo de fuente viaje empaquetado junto con la función `generate-pdf`.
+  Si en el futuro se agregan más archivos binarios a otras funciones (otra
+  fuente, una imagen, etc.), hay que asegurarse de que también caigan dentro
+  de ese patrón (o agregar uno nuevo) para que Netlify los incluya en el
+  deploy.
+
+## Cómo se despliega
+
+El código vive en un repositorio de GitHub conectado a Netlify (Add new site
+→ Import an existing project). Cada vez que se suben cambios al repositorio,
+Netlify redespliega automáticamente. Netlify Blobs no requiere configuración
+manual, se activa solo la primera vez que una función lo usa. Los cambios
+que Claude prepara en una conversación (código nuevo) no se ven reflejados
+en el sitio real hasta que se suben al repositorio y Netlify vuelve a
+desplegar.

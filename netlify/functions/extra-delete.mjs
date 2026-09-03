@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { verificarAuth } from "./auth-utils.mjs";
 
 const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const USUARIO_REGEX = /^[a-zA-Z0-9_-]{3,30}$/;
@@ -18,6 +19,14 @@ export default async (req) => {
   try {
     const body = await req.json();
     const usuario = body?.usuario;
+
+    const authCheck = await verificarAuth(req, usuario);
+    if (!authCheck.ok) {
+      return new Response(JSON.stringify({ error: authCheck.error }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     const fecha = body?.fecha;
     const id = body?.id;
 

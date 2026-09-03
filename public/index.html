@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,7 +21,9 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       --paper: #F6EEDC;
@@ -45,18 +48,20 @@
 
       --radius: 14px;
       --radius-sm: 9px;
-      --shadow: 0 2px 0 rgba(59,44,31,0.06), 0 8px 20px -12px rgba(59,44,31,0.35);
+      --shadow: 0 2px 0 rgba(59, 44, 31, 0.06), 0 8px 20px -12px rgba(59, 44, 31, 0.35);
       --font-display: "Fraunces", Georgia, serif;
       --font-body: "Karla", "Segoe UI", Arial, sans-serif;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       font-family: var(--font-body);
       background: var(--paper);
       background-image:
-        radial-gradient(rgba(169,69,29,0.05) 1px, transparent 1px);
+        radial-gradient(rgba(169, 69, 29, 0.05) 1px, transparent 1px);
       background-size: 22px 22px;
       margin: 0;
       padding: 0 0 28px;
@@ -64,11 +69,20 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    h1, h2, h3 { font-family: var(--font-display); font-weight: 600; }
+    h1,
+    h2,
+    h3 {
+      font-family: var(--font-display);
+      font-weight: 600;
+    }
 
-    a { color: var(--rust-deep); }
+    a {
+      color: var(--rust-deep);
+    }
 
-    button, input, select {
+    button,
+    input,
+    select {
       font-family: inherit;
       color: inherit;
     }
@@ -80,7 +94,23 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      * { transition: none !important; animation: none !important; }
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+
+    body.read-only-mode .card label[for^="input-"],
+    body.read-only-mode .desc-row button,
+    body.read-only-mode .preset-row,
+    body.read-only-mode button.btn-eliminar-extra,
+    body.read-only-mode .rating-star,
+    body.read-only-mode #btn-open-extra,
+    body.read-only-mode #btn-open-activity,
+    body.read-only-mode #btn-extra-guardar,
+    body.read-only-mode .desc-row input {
+      display: none !important;
+      pointer-events: none;
     }
 
     /* --- Pantalla de usuario --- */
@@ -91,6 +121,7 @@
       justify-content: center;
       padding: 20px;
     }
+
     .login-box {
       background: var(--card);
       border: 1px solid var(--line);
@@ -102,6 +133,7 @@
       text-align: center;
       position: relative;
     }
+
     .login-box::before {
       content: "";
       position: absolute;
@@ -110,18 +142,26 @@
       border-radius: 13px;
       pointer-events: none;
     }
+
     .login-box .brand-mark {
       font-size: 2.1em;
       display: block;
       margin-bottom: 2px;
     }
+
     .login-box h1 {
       margin: 4px 0 2px;
       font-size: 1.7em;
       color: var(--rust-deep);
       font-weight: 600;
     }
-    .login-box p { color: var(--ink-soft); font-size: 0.95em; line-height: 1.5; }
+
+    .login-box p {
+      color: var(--ink-soft);
+      font-size: 0.95em;
+      line-height: 1.5;
+    }
+
     .login-box input[type="text"] {
       width: 100%;
       padding: 13px 14px;
@@ -133,7 +173,11 @@
       margin: 16px 0 6px;
       text-align: center;
     }
-    .login-box input[type="text"]:focus { border-color: var(--rust); }
+
+    .login-box input[type="text"]:focus {
+      border-color: var(--rust);
+    }
+
     .login-box button {
       background: var(--rust);
       color: var(--paper);
@@ -147,7 +191,11 @@
       margin-top: 10px;
       transition: background 0.15s;
     }
-    .login-box button:hover { background: var(--rust-deep); }
+
+    .login-box button:hover {
+      background: var(--rust-deep);
+    }
+
     .login-msg {
       color: var(--danger);
       font-size: 0.85em;
@@ -161,20 +209,26 @@
       background-image: linear-gradient(180deg, var(--rust) 0%, var(--rust-deep) 100%);
       padding: 18px 16px 16px;
       margin-bottom: 14px;
-      box-shadow: 0 4px 14px -8px rgba(59,44,31,0.5);
+      box-shadow: 0 4px 14px -8px rgba(59, 44, 31, 0.5);
     }
+
     .brand {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .brand-mark { font-size: 1.5em; }
+
+    .brand-mark {
+      font-size: 1.5em;
+    }
+
     .app-header h1 {
       color: var(--paper);
       margin: 0;
       font-size: 1.5em;
       letter-spacing: 0.2px;
     }
+
     .user-bar {
       max-width: 900px;
       margin: 10px auto 0;
@@ -185,14 +239,19 @@
       flex-wrap: wrap;
       font-size: 0.85em;
     }
+
     .user-chip {
-      color: rgba(246,238,220,0.85);
+      color: rgba(246, 238, 220, 0.85);
       padding: 5px 4px;
     }
-    .user-chip b { color: var(--paper); }
+
+    .user-chip b {
+      color: var(--paper);
+    }
+
     .user-bar button {
-      background: rgba(246,238,220,0.14);
-      border: 1px solid rgba(246,238,220,0.4);
+      background: rgba(246, 238, 220, 0.14);
+      border: 1px solid rgba(246, 238, 220, 0.4);
       border-radius: 20px;
       padding: 6px 14px;
       cursor: pointer;
@@ -200,8 +259,15 @@
       color: var(--paper);
       transition: background 0.15s;
     }
-    .user-bar button:hover { background: rgba(246,238,220,0.26); }
-    .user-bar .copiado { color: #E8F0DD; font-weight: 700; }
+
+    .user-bar button:hover {
+      background: rgba(246, 238, 220, 0.26);
+    }
+
+    .user-bar .copiado {
+      color: #E8F0DD;
+      font-weight: 700;
+    }
 
     .day-nav {
       display: flex;
@@ -212,6 +278,7 @@
       margin: 4px auto 10px;
       padding: 0 12px;
     }
+
     .day-nav button {
       background: var(--card);
       border: 1.5px solid var(--line);
@@ -225,8 +292,18 @@
       cursor: pointer;
       transition: background 0.15s, border-color 0.15s;
     }
-    .day-nav button:hover { background: var(--paper-deep); border-color: var(--rust); }
-    .day-nav .fecha-wrap { text-align: center; flex: 1; min-width: 0; }
+
+    .day-nav button:hover {
+      background: var(--paper-deep);
+      border-color: var(--rust);
+    }
+
+    .day-nav .fecha-wrap {
+      text-align: center;
+      flex: 1;
+      min-width: 0;
+    }
+
     .day-nav .fecha {
       font-family: var(--font-display);
       font-weight: 600;
@@ -236,6 +313,7 @@
       color: var(--ink);
       line-height: 1.2;
     }
+
     .day-nav input[type="date"] {
       margin-top: 4px;
       padding: 5px 8px;
@@ -254,7 +332,10 @@
       display: flex;
       flex-direction: column;
     }
-    .main-col { min-width: 0; }
+
+    .main-col {
+      min-width: 0;
+    }
 
     .grid {
       display: grid;
@@ -263,6 +344,7 @@
       max-width: 900px;
       margin: 6px auto 14px;
     }
+
     .card {
       background: var(--card);
       border: 1px solid var(--line-soft);
@@ -271,6 +353,7 @@
       overflow: hidden;
       text-align: center;
     }
+
     .card h2 {
       margin: 0;
       padding: 9px 8px;
@@ -280,10 +363,22 @@
       font-weight: 600;
       letter-spacing: 0.2px;
     }
-    .card-desayuno h2 { background: var(--mustard-deep); }
-    .card-almuerzo h2 { background: var(--rust-deep); }
-    .card-merienda h2 { background: var(--apricot-deep); }
-    .card-cena h2 { background: var(--plum-deep); }
+
+    .card-desayuno h2 {
+      background: var(--mustard-deep);
+    }
+
+    .card-almuerzo h2 {
+      background: var(--rust-deep);
+    }
+
+    .card-merienda h2 {
+      background: var(--apricot-deep);
+    }
+
+    .card-cena h2 {
+      background: var(--plum-deep);
+    }
 
     .img-wrap {
       width: 100%;
@@ -298,9 +393,13 @@
       font-size: 0.75em;
       font-family: var(--font-body);
     }
+
     @media (min-width: 620px) {
-      .img-wrap { height: 190px; }
+      .img-wrap {
+        height: 190px;
+      }
     }
+
     .img-wrap img {
       width: 100%;
       height: 100%;
@@ -321,13 +420,18 @@
       padding: 20px;
       box-sizing: border-box;
     }
-    .lightbox.open { display: flex; }
+
+    .lightbox.open {
+      display: flex;
+    }
+
     .lightbox img {
       max-width: 100%;
       max-height: 90vh;
       border-radius: 8px;
-      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
     }
+
     .lightbox-close {
       position: absolute;
       top: 16px;
@@ -339,6 +443,7 @@
       background: none;
       border: none;
     }
+
     .card label {
       display: block;
       padding: 9px;
@@ -349,9 +454,20 @@
       font-size: 0.78em;
       transition: background 0.15s;
     }
-    .card label:hover { background: #3c4728; }
-    .card label.loading { background: var(--ink-soft); cursor: wait; }
-    .card input[type="file"] { display: none; }
+
+    .card label:hover {
+      background: #3c4728;
+    }
+
+    .card label.loading {
+      background: var(--ink-soft);
+      cursor: wait;
+    }
+
+    .card input[type="file"] {
+      display: none;
+    }
+
     .msg {
       font-size: 0.75em;
       padding: 0 8px 6px;
@@ -366,6 +482,7 @@
       gap: 2px;
       padding: 6px 4px 2px;
     }
+
     .rating-star {
       background: none;
       border: none;
@@ -376,8 +493,14 @@
       color: var(--line);
       transition: transform 0.1s;
     }
-    .rating-star.lleno { color: var(--mustard-deep); }
-    .rating-star:hover { transform: scale(1.15); }
+
+    .rating-star.lleno {
+      color: var(--mustard-deep);
+    }
+
+    .rating-star:hover {
+      transform: scale(1.15);
+    }
 
     /* --- Fila de descripción (ingredientes) --- */
     .desc-row {
@@ -387,6 +510,7 @@
       border-top: 1px dashed var(--line);
       align-items: center;
     }
+
     .desc-row input[type="text"] {
       flex: 1;
       padding: 7px 8px;
@@ -396,7 +520,11 @@
       font-size: 0.78em;
       min-width: 0;
     }
-    .desc-row input[type="text"]:focus { border-color: var(--rust); }
+
+    .desc-row input[type="text"]:focus {
+      border-color: var(--rust);
+    }
+
     .desc-row button {
       background: var(--apricot-deep);
       color: var(--paper);
@@ -408,14 +536,27 @@
       flex-shrink: 0;
       transition: background 0.15s;
     }
-    .desc-row button:hover { background: #7d3d17; }
-    .desc-row button.guardado { background: var(--sage-deep); }
-    .desc-row button.star { background: var(--mustard-deep); }
-    .desc-row button.star:hover { background: #7a530c; }
+
+    .desc-row button:hover {
+      background: #7d3d17;
+    }
+
+    .desc-row button.guardado {
+      background: var(--sage-deep);
+    }
+
+    .desc-row button.star {
+      background: var(--mustard-deep);
+    }
+
+    .desc-row button.star:hover {
+      background: #7a530c;
+    }
 
     .preset-row {
       padding: 0 8px 6px;
     }
+
     .preset-row select {
       width: 100%;
       padding: 6px;
@@ -435,13 +576,15 @@
       justify-content: center;
       gap: 6px;
     }
+
     .extra-tag {
       font-size: 0.7em;
       font-weight: normal;
-      background: rgba(255,255,255,0.22);
+      background: rgba(255, 255, 255, 0.22);
       padding: 2px 8px;
       border-radius: 10px;
     }
+
     .btn-eliminar-extra {
       display: block;
       width: 100%;
@@ -454,7 +597,10 @@
       font-size: 0.78em;
       transition: background 0.15s;
     }
-    .btn-eliminar-extra:hover { background: #7c2f24; }
+
+    .btn-eliminar-extra:hover {
+      background: #7c2f24;
+    }
 
     /* --- Menú de acciones (hamburguesa) --- */
     .brand-row {
@@ -465,10 +611,15 @@
       max-width: 900px;
       margin: 0 auto;
     }
-    .menu-wrap { position: relative; flex-shrink: 0; }
+
+    .menu-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
     .menu-btn {
-      background: rgba(246,238,220,0.14);
-      border: 1px solid rgba(246,238,220,0.4);
+      background: rgba(246, 238, 220, 0.14);
+      border: 1px solid rgba(246, 238, 220, 0.4);
       color: var(--paper);
       width: 42px;
       height: 42px;
@@ -481,7 +632,11 @@
       justify-content: center;
       transition: background 0.15s;
     }
-    .menu-btn:hover, .menu-btn[aria-expanded="true"] { background: rgba(246,238,220,0.28); }
+
+    .menu-btn:hover,
+    .menu-btn[aria-expanded="true"] {
+      background: rgba(246, 238, 220, 0.28);
+    }
 
     .quick-menu {
       position: absolute;
@@ -502,11 +657,13 @@
       pointer-events: none;
       transition: opacity 0.15s, transform 0.15s;
     }
+
     .quick-menu.open {
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
     }
+
     .quick-menu-item {
       display: flex;
       align-items: center;
@@ -525,9 +682,20 @@
       text-align: left;
       transition: background 0.12s;
     }
-    .quick-menu-item:hover { background: var(--paper-deep); }
-    .quick-menu-item .qmi-icon { font-size: 1.15em; flex-shrink: 0; }
-    .quick-menu-item .qmi-label { flex: 1; }
+
+    .quick-menu-item:hover {
+      background: var(--paper-deep);
+    }
+
+    .quick-menu-item .qmi-icon {
+      font-size: 1.15em;
+      flex-shrink: 0;
+    }
+
+    .quick-menu-item .qmi-label {
+      flex: 1;
+    }
+
     .quick-menu-item .badge {
       background: var(--sage-deep);
       color: var(--paper);
@@ -536,10 +704,22 @@
       font-size: 0.8em;
       flex-shrink: 0;
     }
-    #btn-open-activity { border-left-color: var(--sage-deep); }
-    #btn-open-extra { border-left-color: var(--apricot-deep); }
-    #btn-open-pdf { border-left-color: #4A3524; }
-    #btn-open-progreso { border-left-color: var(--mustard-deep); }
+
+    #btn-open-activity {
+      border-left-color: var(--sage-deep);
+    }
+
+    #btn-open-extra {
+      border-left-color: var(--apricot-deep);
+    }
+
+    #btn-open-pdf {
+      border-left-color: #4A3524;
+    }
+
+    #btn-open-progreso {
+      border-left-color: var(--mustard-deep);
+    }
 
     /* --- Ventanas modales genéricas --- */
     .modal-overlay {
@@ -553,7 +733,11 @@
       padding: 16px;
       box-sizing: border-box;
     }
-    .modal-overlay.open { display: flex; }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
     .modal-box {
       background: var(--card);
       border-radius: 18px;
@@ -567,15 +751,32 @@
       box-sizing: border-box;
       text-align: left;
     }
-    #modal-activity .modal-box { border-top-color: var(--sage-deep); }
-    #modal-extra .modal-box { border-top-color: var(--apricot-deep); }
-    #modal-pdf .modal-box { border-top-color: #4A3524; }
-    #modal-progreso .modal-box { border-top-color: var(--mustard-deep); }
+
+    #modal-activity .modal-box {
+      border-top-color: var(--sage-deep);
+    }
+
+    #modal-extra .modal-box {
+      border-top-color: var(--apricot-deep);
+    }
+
+    #modal-pdf .modal-box {
+      border-top-color: #4A3524;
+    }
+
+    #modal-progreso .modal-box {
+      border-top-color: var(--mustard-deep);
+    }
+
     @media (min-width: 860px) {
-      #modal-activity .modal-box, #modal-extra .modal-box, #modal-pdf .modal-box {
+
+      #modal-activity .modal-box,
+      #modal-extra .modal-box,
+      #modal-pdf .modal-box {
         border-top-width: 4px;
       }
     }
+
     .modal-box h3 {
       margin: 0 0 14px;
       text-align: center;
@@ -583,7 +784,14 @@
       padding-right: 24px;
       color: var(--ink);
     }
-    .modal-box p { margin-top: 0; font-size: 0.9em; color: var(--ink-soft); line-height: 1.5; }
+
+    .modal-box p {
+      margin-top: 0;
+      font-size: 0.9em;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+
     .modal-close {
       position: absolute;
       top: 10px;
@@ -595,7 +803,10 @@
       color: var(--ink-soft);
       cursor: pointer;
     }
-    .modal-close:hover { color: var(--ink); }
+
+    .modal-close:hover {
+      color: var(--ink);
+    }
 
     /* --- Contenido del modal "agregar comida extra" --- */
     .extra-form {
@@ -604,6 +815,7 @@
       flex-wrap: wrap;
       margin-bottom: 14px;
     }
+
     .extra-form label {
       flex: 1;
       min-width: 160px;
@@ -613,6 +825,7 @@
       gap: 4px;
       color: var(--ink-soft);
     }
+
     .extra-form select,
     .extra-form input[type="text"] {
       padding: 8px;
@@ -622,7 +835,11 @@
       font-size: 1em;
       color: var(--ink);
     }
-    .modal-box input[type="file"] { display: none; }
+
+    .modal-box input[type="file"] {
+      display: none;
+    }
+
     .extra-file-label {
       display: inline-block;
       background: var(--paper-deep);
@@ -633,13 +850,18 @@
       font-size: 0.9em;
       transition: background 0.15s;
     }
-    .extra-file-label:hover { background: var(--line-soft); }
+
+    .extra-file-label:hover {
+      background: var(--line-soft);
+    }
+
     .extra-file-name {
       font-size: 0.85em;
       color: var(--ink-soft);
       margin: 8px 0;
       word-break: break-all;
     }
+
     #btn-extra-guardar {
       background: var(--apricot-deep);
       color: var(--paper);
@@ -653,13 +875,21 @@
       margin: 10px auto 0;
       transition: background 0.15s;
     }
-    #btn-extra-guardar:hover { background: #7d3d17; }
-    #btn-extra-guardar:disabled { background: var(--line); cursor: wait; }
+
+    #btn-extra-guardar:hover {
+      background: #7d3d17;
+    }
+
+    #btn-extra-guardar:disabled {
+      background: var(--line);
+      cursor: wait;
+    }
 
     /* --- Contenido del modal "actividad física" --- */
     .activity-list {
       margin-bottom: 14px;
     }
+
     .activity-item {
       display: flex;
       align-items: center;
@@ -671,8 +901,16 @@
       margin-bottom: 8px;
       font-size: 0.9em;
     }
-    .activity-item .texto { color: var(--ink); overflow-wrap: anywhere; }
-    .activity-item .texto b { color: var(--sage-deep); }
+
+    .activity-item .texto {
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .activity-item .texto b {
+      color: var(--sage-deep);
+    }
+
     .activity-item button {
       background: none;
       border: none;
@@ -681,18 +919,21 @@
       font-size: 1.05em;
       flex-shrink: 0;
     }
+
     .activity-empty {
       font-size: 0.85em;
       color: var(--ink-soft);
       text-align: center;
       padding: 4px 0 8px;
     }
+
     .activity-form {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       margin-bottom: 10px;
     }
+
     .activity-form input[type="text"] {
       flex: 1;
       min-width: 140px;
@@ -704,12 +945,14 @@
       box-sizing: border-box;
       color: var(--ink);
     }
+
     .activity-actions {
       display: flex;
       gap: 8px;
       justify-content: center;
       margin-top: 4px;
     }
+
     #btn-activity-add {
       background: var(--sage-deep);
       color: var(--paper);
@@ -721,8 +964,16 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    #btn-activity-add:hover { background: #3c4728; }
-    #btn-activity-add:disabled { background: var(--line); cursor: wait; }
+
+    #btn-activity-add:hover {
+      background: #3c4728;
+    }
+
+    #btn-activity-add:disabled {
+      background: var(--line);
+      cursor: wait;
+    }
+
     #btn-activity-star {
       background: var(--mustard-deep);
       color: var(--paper);
@@ -733,7 +984,10 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    #btn-activity-star:hover { background: #7a530c; }
+
+    #btn-activity-star:hover {
+      background: #7a530c;
+    }
 
     /* --- Contenido del modal "generar PDF" --- */
     .rango {
@@ -744,6 +998,7 @@
       margin: 16px 0;
       align-items: center;
     }
+
     label.rango-label {
       font-size: 0.9em;
       display: flex;
@@ -752,6 +1007,7 @@
       text-align: left;
       color: var(--ink-soft);
     }
+
     .rango input[type="date"] {
       padding: 8px;
       border-radius: 6px;
@@ -759,6 +1015,7 @@
       background: var(--paper);
       color: var(--ink);
     }
+
     #btn-pdf {
       background: #4A3524;
       color: var(--paper);
@@ -772,8 +1029,16 @@
       margin: 0 auto;
       transition: background 0.15s;
     }
-    #btn-pdf:hover { background: #382713; }
-    #btn-pdf:disabled { background: var(--line); cursor: wait; }
+
+    #btn-pdf:hover {
+      background: #382713;
+    }
+
+    #btn-pdf:disabled {
+      background: var(--line);
+      cursor: wait;
+    }
+
     .pdf-msg {
       margin-top: 10px;
       font-size: 0.85em;
@@ -787,6 +1052,7 @@
       text-align: center;
       padding: 10px 0 16px;
     }
+
     .racha-numero {
       font-family: var(--font-display);
       font-size: 2.6em;
@@ -795,10 +1061,12 @@
       display: block;
       line-height: 1;
     }
+
     .racha-texto {
       font-size: 0.85em;
       color: var(--ink-soft);
     }
+
     .calendario-nav {
       display: flex;
       align-items: center;
@@ -806,6 +1074,7 @@
       gap: 16px;
       margin-bottom: 10px;
     }
+
     .calendario-nav button {
       background: var(--paper-deep);
       border: 1px solid var(--line);
@@ -816,6 +1085,7 @@
       cursor: pointer;
       font-size: 1.1em;
     }
+
     .calendario-mes {
       font-weight: 700;
       font-size: 0.95em;
@@ -824,11 +1094,13 @@
       min-width: 130px;
       text-align: center;
     }
+
     .calendario-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 5px;
     }
+
     .calendario-dia {
       aspect-ratio: 1;
       display: flex;
@@ -838,11 +1110,34 @@
       font-size: 0.78em;
       color: var(--ink);
     }
-    .calendario-dia.estado-verde { background: #C7D4AE; color: var(--sage-deep); font-weight: 700; }
-    .calendario-dia.estado-amarillo { background: #F0DBA0; color: #7A5C10; font-weight: 700; }
-    .calendario-dia.estado-rojo { background: #E4B4AC; color: var(--danger); font-weight: 700; }
-    .calendario-dia.estado-gris { background: var(--paper-deep); color: var(--ink-soft); }
-    .calendario-dia.vacio { background: none; }
+
+    .calendario-dia.estado-verde {
+      background: #C7D4AE;
+      color: var(--sage-deep);
+      font-weight: 700;
+    }
+
+    .calendario-dia.estado-amarillo {
+      background: #F0DBA0;
+      color: #7A5C10;
+      font-weight: 700;
+    }
+
+    .calendario-dia.estado-rojo {
+      background: #E4B4AC;
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .calendario-dia.estado-gris {
+      background: var(--paper-deep);
+      color: var(--ink-soft);
+    }
+
+    .calendario-dia.vacio {
+      background: none;
+    }
+
     .calendario-leyenda {
       display: flex;
       justify-content: center;
@@ -852,14 +1147,38 @@
       font-size: 0.78em;
       color: var(--ink-soft);
     }
-    .calendario-leyenda span { display: flex; align-items: center; gap: 5px; }
-    .calendario-leyenda .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-    .dot-verde { background: #8FA467; }
-    .dot-amarillo { background: #D8AE3F; }
-    .dot-rojo { background: #C97C6C; }
-    .dot-gris { background: var(--line); }
+
+    .calendario-leyenda span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .calendario-leyenda .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .dot-verde {
+      background: #8FA467;
+    }
+
+    .dot-amarillo {
+      background: #D8AE3F;
+    }
+
+    .dot-rojo {
+      background: #C97C6C;
+    }
+
+    .dot-gris {
+      background: var(--line);
+    }
   </style>
 </head>
+
 <body>
 
   <!-- Pantalla para ingresar el usuario -->
@@ -867,12 +1186,32 @@
     <div class="login-box">
       <span class="brand-mark" aria-hidden="true">🍽️</span>
       <h1>Comidas del día</h1>
-      <p>Elegí un nombre de usuario. Va a quedar guardado en este link para
-        que solo vos (y quien compartas el link) vean estas fotos.</p>
-      <input type="text" id="input-usuario" placeholder="ej: martin83" maxlength="30" autocomplete="off">
+      <p>Entrá con un usuario (y opcionalmente contraseña). Si es un usuario nuevo, la contraseña que elijas quedará
+        asignada.</p>
+      <input type="text" id="input-usuario" placeholder="Usuario (ej: martin83)" maxlength="30" autocomplete="off">
+      <input type="password" id="input-password" placeholder="Contraseña (dejar en blanco para solo ver)" maxlength="50"
+        style="width: 100%; padding: 13px 14px; font-size: 1.1em; border: 1.5px solid var(--line); background: var(--paper); border-radius: var(--radius-sm); margin: 6px 0; text-align: center; box-sizing:border-box;">
       <button id="btn-entrar">Entrar</button>
       <div class="login-msg" id="login-msg"></div>
     </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="admin-panel"
+    style="display:none; max-width:800px; margin: 40px auto; padding: 24px; background:var(--card); font-family: var(--font-body); border-radius:10px;">
+    <h2>Panel de Administrador</h2>
+    <button id="btn-cerrar-admin"
+      style="padding:10px 16px; background:var(--rust); font-family: var(--font-body); color:white; border:none; border-radius:5px; margin-bottom:14px; cursor:pointer;">Cerrar
+      sesión</button>
+    <table style="width:100%; border-collapse:collapse; text-align:left;">
+      <thead>
+        <tr style="border-bottom:1.5px solid var(--line); color: var(--rust-deep);">
+          <th style="padding:8px">Usuario</th>
+          <th>Contraseña</th>
+        </tr>
+      </thead>
+      <tbody id="admin-tbody"></tbody>
+    </table>
   </div>
 
   <!-- App principal (oculta hasta tener usuario) -->
@@ -884,7 +1223,8 @@
           <h1>Comidas del día</h1>
         </div>
         <div class="menu-wrap">
-          <button id="btn-menu" class="menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Abrir menú de acciones">☰</button>
+          <button id="btn-menu" class="menu-btn" aria-haspopup="true" aria-expanded="false"
+            aria-label="Abrir menú de acciones">☰</button>
           <nav class="quick-menu" id="quick-menu">
             <button id="btn-open-activity" class="quick-menu-item">
               <span class="qmi-icon" aria-hidden="true">🏃</span>
@@ -908,8 +1248,13 @@
       </div>
       <div class="user-bar">
         <span class="user-chip">Usuario: <b id="user-label"></b></span>
-        <button id="btn-compartir">🔗 Compartir mi link</button>
-        <button id="btn-cambiar-usuario">Cambiar de usuario</button>
+        <button id="btn-login"
+          style="display:none; background:var(--mustard-deep); border-color:var(--mustard-deep);">🔑 Editar</button>
+        <button id="btn-change-password"
+          style="display:none; background:var(--sage-deep); border-color:var(--sage-deep);">🔑 Cambiar
+          Contraseña</button>
+        <button id="btn-compartir">🔗 Compartir</button>
+        <button id="btn-cambiar-usuario">Salir</button>
       </div>
     </header>
 
@@ -975,49 +1320,49 @@
           </div>
         </div>
 
-    <!-- Modal: generar PDF -->
-    <div class="modal-overlay" id="modal-pdf">
-      <div class="modal-box">
-        <button class="modal-close" data-close="modal-pdf">&times;</button>
-        <h3>📄 Generar PDF</h3>
-        <p>Elegí el rango de fechas (una hoja por día con las comidas, y al
-          final un resumen con cuántas veces hiciste cada actividad física).</p>
-        <div class="rango">
-          <label class="rango-label">Desde
-            <input type="date" id="pdf-desde">
-          </label>
-          <label class="rango-label">Hasta
-            <input type="date" id="pdf-hasta">
-          </label>
+        <!-- Modal: generar PDF -->
+        <div class="modal-overlay" id="modal-pdf">
+          <div class="modal-box">
+            <button class="modal-close" data-close="modal-pdf">&times;</button>
+            <h3>📄 Generar PDF</h3>
+            <p>Elegí el rango de fechas (una hoja por día con las comidas, y al
+              final un resumen con cuántas veces hiciste cada actividad física).</p>
+            <div class="rango">
+              <label class="rango-label">Desde
+                <input type="date" id="pdf-desde">
+              </label>
+              <label class="rango-label">Hasta
+                <input type="date" id="pdf-hasta">
+              </label>
+            </div>
+            <button id="btn-pdf">Descargar PDF</button>
+            <div class="pdf-msg" id="pdf-msg"></div>
+          </div>
         </div>
-        <button id="btn-pdf">Descargar PDF</button>
-        <div class="pdf-msg" id="pdf-msg"></div>
-      </div>
-    </div>
 
-    <!-- Modal: mi progreso (racha + calendario) -->
-    <div class="modal-overlay" id="modal-progreso">
-      <div class="modal-box">
-        <button class="modal-close" data-close="modal-progreso">&times;</button>
-        <h3>🏆 Mi progreso</h3>
-        <div class="racha-box">
-          <span class="racha-numero" id="racha-numero">–</span>
-          <span class="racha-texto" id="racha-texto">días seguidos cumpliendo</span>
+        <!-- Modal: mi progreso (racha + calendario) -->
+        <div class="modal-overlay" id="modal-progreso">
+          <div class="modal-box">
+            <button class="modal-close" data-close="modal-progreso">&times;</button>
+            <h3>🏆 Mi progreso</h3>
+            <div class="racha-box">
+              <span class="racha-numero" id="racha-numero">–</span>
+              <span class="racha-texto" id="racha-texto">días seguidos cumpliendo</span>
+            </div>
+            <div class="calendario-nav">
+              <button id="btn-mes-prev" aria-label="Mes anterior">‹</button>
+              <span class="calendario-mes" id="calendario-mes-label"></span>
+              <button id="btn-mes-next" aria-label="Mes siguiente">›</button>
+            </div>
+            <div class="calendario-grid" id="calendario-grid"></div>
+            <div class="calendario-leyenda">
+              <span><i class="dot dot-verde"></i> Bien</span>
+              <span><i class="dot dot-amarillo"></i> Regular</span>
+              <span><i class="dot dot-rojo"></i> Mal</span>
+              <span><i class="dot dot-gris"></i> Sin datos</span>
+            </div>
+          </div>
         </div>
-        <div class="calendario-nav">
-          <button id="btn-mes-prev" aria-label="Mes anterior">‹</button>
-          <span class="calendario-mes" id="calendario-mes-label"></span>
-          <button id="btn-mes-next" aria-label="Mes siguiente">›</button>
-        </div>
-        <div class="calendario-grid" id="calendario-grid"></div>
-        <div class="calendario-leyenda">
-          <span><i class="dot dot-verde"></i> Bien</span>
-          <span><i class="dot dot-amarillo"></i> Regular</span>
-          <span><i class="dot dot-rojo"></i> Mal</span>
-          <span><i class="dot dot-gris"></i> Sin datos</span>
-        </div>
-      </div>
-    </div>
       </aside>
 
       <div class="main-col">
@@ -1047,13 +1392,32 @@
       merienda: "Merienda",
       cena: "Cena",
     };
-    const DIAS_SEMANA = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
-    const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    const DIAS_SEMANA = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+    const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
     const USUARIO_REGEX = /^[a-zA-Z0-9_-]{3,30}$/;
 
     let usuario = null;
+    let authToken = null;
+    let adminMode = false;
+    let readOnly = false;
     let currentDate = new Date();
-    currentDate.setHours(0,0,0,0);
+    currentDate.setHours(0, 0, 0, 0);
+
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const [url, options] = args;
+      if (options && options.method && options.method !== 'GET') {
+        if (!options.headers) options.headers = {};
+        if (authToken) {
+          if (options.headers instanceof Headers) {
+            options.headers.append("X-User-Password", authToken);
+          } else {
+            options.headers["X-User-Password"] = authToken;
+          }
+        }
+      }
+      return originalFetch(...args);
+    };
 
     // ---------------- Usuario ----------------
     function usuarioDesdeURL() {
@@ -1064,12 +1428,12 @@
     function iniciar() {
       const urlUser = usuarioDesdeURL();
       if (urlUser && USUARIO_REGEX.test(urlUser)) {
-        entrarComoUsuario(urlUser, false);
+        entrarComoUsuario(urlUser, null, false);
         return;
       }
       const guardado = localStorage.getItem("comidas_usuario");
       if (guardado && USUARIO_REGEX.test(guardado)) {
-        entrarComoUsuario(guardado, true);
+        entrarComoUsuario(guardado, null, true);
         return;
       }
       mostrarPantallaLogin();
@@ -1078,36 +1442,138 @@
     function mostrarPantallaLogin(mensaje) {
       document.getElementById("pantalla-usuario").style.display = "flex";
       document.getElementById("app").style.display = "none";
-      const msg = document.getElementById("login-msg");
-      msg.textContent = mensaje || "";
+      document.getElementById("login-msg").textContent = mensaje || "";
+      document.getElementById("input-password").value = "";
     }
 
-    function entrarComoUsuario(nombre, actualizarURL) {
+    async function entrarComoUsuario(nombre, pass, actualizarURL) {
       usuario = nombre;
+
+      if (pass) {
+        try {
+          const res = await originalFetch("/api/auth-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usuario: nombre, password: pass })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            document.getElementById("login-msg").textContent = data.error || "Error de autenticación";
+            return;
+          }
+          authToken = pass;
+          adminMode = !!data.admin;
+          readOnly = false;
+          if (!adminMode) localStorage.setItem("comidas_auth_" + nombre, pass);
+        } catch (e) {
+          document.getElementById("login-msg").textContent = "Error de red (" + e.message + ")";
+          return;
+        }
+      } else {
+        const savedPass = localStorage.getItem("comidas_auth_" + nombre);
+        if (savedPass) {
+          // You could optionally verify the token here, but we will just trust it and let mutations fail if wrong
+          authToken = savedPass;
+          readOnly = false;
+        } else {
+          authToken = null;
+          readOnly = true;
+        }
+      }
+
       localStorage.setItem("comidas_usuario", nombre);
       if (actualizarURL) {
         const url = new URL(window.location.href);
         url.searchParams.set("u", nombre);
         window.history.replaceState({}, "", url);
       }
+
       document.getElementById("pantalla-usuario").style.display = "none";
+
+      if (adminMode) {
+        mostrarPanelAdmin();
+        return;
+      }
+
       document.getElementById("app").style.display = "block";
       document.getElementById("user-label").textContent = nombre;
+      document.getElementById("btn-login").style.display = readOnly ? "inline-block" : "none";
+      document.getElementById("btn-change-password").style.display = (!readOnly && !adminMode) ? "inline-block" : "none";
+      document.body.classList.toggle("read-only-mode", readOnly);
+
       renderFechaLabel();
       Promise.all([cargarPresets(), cargarPresetsActividad()]).then(renderDia);
     }
 
+    async function mostrarPanelAdmin() {
+      document.getElementById("app").style.display = "none";
+      document.getElementById("admin-panel").style.display = "block";
+      document.getElementById("admin-tbody").innerHTML = "<tr><td colspan='2'>Cargando...</td></tr>";
+      try {
+        const res = await originalFetch("/api/admin-users", {
+          headers: { "X-User-Password": authToken }
+        });
+        const data = await res.json();
+        const tbody = document.getElementById("admin-tbody");
+        if (data.users && data.users.length) {
+          tbody.innerHTML = data.users.map(u => `<tr><td style="padding:8px; border-bottom:1px solid #ddd">${escapeHTML(u.usuario)}</td><td style="border-bottom:1px solid #ddd">${escapeHTML(u.password || '')}</td></tr>`).join("");
+        } else {
+          tbody.innerHTML = "<tr><td colspan='2'>No hay usuarios.</td></tr>";
+        }
+      } catch (e) {
+        document.getElementById("admin-tbody").innerHTML = "<tr><td colspan='2'>Error cargando admin</td></tr>";
+      }
+    }
+
+    document.getElementById("btn-cerrar-admin").addEventListener("click", () => {
+      localStorage.removeItem("comidas_usuario");
+      window.location.reload();
+    });
+
+    document.getElementById("btn-login").addEventListener("click", () => {
+      document.getElementById("input-usuario").value = usuario;
+      mostrarPantallaLogin("Ingresá tu contraseña para poder editar este perfil.");
+    });
+
+    document.getElementById("btn-change-password").addEventListener("click", async () => {
+      const nueva = prompt("Ingresá tu nueva contraseña (mínimo 3 caracteres):");
+      if (!nueva || nueva.length < 3) return;
+      try {
+        const res = await originalFetch("/api/auth-change-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-User-Password": authToken },
+          body: JSON.stringify({ usuario, newPassword: nueva })
+        });
+        if (res.ok) {
+          authToken = nueva;
+          localStorage.setItem("comidas_auth_" + usuario, nueva);
+          alert("Contraseña cambiada con éxito.");
+        } else {
+          const text = await res.json();
+          alert("Error: " + text.error);
+        }
+      } catch (e) {
+        alert("Error de red.");
+      }
+    });
+
     document.getElementById("btn-entrar").addEventListener("click", () => {
       const valor = document.getElementById("input-usuario").value.trim();
+      const pass = document.getElementById("input-password").value;
       if (!USUARIO_REGEX.test(valor)) {
-        document.getElementById("login-msg").textContent =
-          "Usá entre 3 y 30 caracteres: letras, números, guiones o guión bajo.";
+        document.getElementById("login-msg").textContent = "Usá entre 3 y 30 caracteres: letras, números, guiones o guión bajo.";
         return;
       }
-      entrarComoUsuario(valor, true);
+      document.getElementById("login-msg").textContent = "Autenticando...";
+      entrarComoUsuario(valor, pass, true);
     });
-    document.getElementById("input-usuario").addEventListener("keydown", (e) => {
+
+    document.getElementById("input-password").addEventListener("keydown", (e) => {
       if (e.key === "Enter") document.getElementById("btn-entrar").click();
+    });
+
+    document.getElementById("input-usuario").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("input-password").focus();
     });
 
     document.getElementById("btn-cambiar-usuario").addEventListener("click", () => {
@@ -1116,6 +1582,7 @@
       url.searchParams.delete("u");
       window.history.replaceState({}, "", url);
       document.getElementById("input-usuario").value = "";
+      document.getElementById("input-password").value = "";
       mostrarPantallaLogin();
     });
 
@@ -1460,7 +1927,7 @@
           img.addEventListener("click", () => abrirLightbox(img.src));
           wrap.appendChild(img);
         };
-        img.onerror = () => {};
+        img.onerror = () => { };
         img.src = `/api/image?usuario=${encodeURIComponent(usuario)}&comida=${key}&fecha=${fechaStr}&t=${Date.now()}`;
       }
 
@@ -1913,4 +2380,5 @@
     iniciar();
   </script>
 </body>
+
 </html>

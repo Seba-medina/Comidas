@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { verificarAuth } from "./auth-utils.mjs";
 
 const COMIDAS_VALIDAS = ["desayuno", "almuerzo", "merienda", "cena"];
 const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -12,6 +13,14 @@ export default async (req) => {
   try {
     const formData = await req.formData();
     const usuario = formData.get("usuario");
+
+    const authCheck = await verificarAuth(req, usuario);
+    if (!authCheck.ok) {
+      return new Response(JSON.stringify({ error: authCheck.error }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     const comida = formData.get("comida");
     const fecha = formData.get("fecha");
     const file = formData.get("foto");
