@@ -54,8 +54,7 @@ web y el PDF:
 - **Generación de PDF:** librería `pdf-lib` (del lado del servidor, en una
   Netlify Function), con `@pdf-lib/fontkit` para poder incrustar una fuente
   real (DM Serif Display) en vez de usar solo las fuentes estándar del PDF.
-- **Multiusuario:** por parámetro de URL `?u=nombre_usuario`, sin contraseña
-  real (es "seguridad por oscuridad" — cada quien tiene su propio link).
+- **Multiusuario y Autenticación:** Cada cuenta puede visualizarse de forma pública a través del parámetro de URL `?u=nombre_usuario` entrando en un "Modo Lectura". Para poder modificar, agregar comidas o generar PDFs se requiere iniciar sesión en la cuenta con su propia **contraseña**.
 
 ## Estructura de archivos
 
@@ -71,6 +70,10 @@ public/
     icon-192.png, icon-512.png, apple-touch-icon.png   → ícono rediseñado (plato+cubiertos
                                                            en la paleta cálida actual)
 netlify/functions/
+  auth-login.mjs                 → POST: autentica un usuario para permitirle (o crear) cuenta con contraseña
+  auth-change-password.mjs       → POST: permite cambiar la contraseña del usuario logueado
+  auth-utils.mjs                 → Helper/Middleware: intercepta y verifica el header de contraseña
+  admin-users.mjs                → GET: uso exclusivo de admin para ver todas las claves
   upload.mjs                    → POST: sube foto de una de las 4 comidas base
   image.mjs                     → GET: sirve la foto de una comida base
   extras.mjs                    → GET: lista las comidas "extra" de un día
@@ -104,6 +107,7 @@ netlify/functions/
 - Foto de comida base: `usuario:fecha:comida`
   (ej: `martin83:2026-09-01:desayuno`) → el binario de la imagen (JPG/PNG),
   con metadata `contentType`.
+- Contraseña de usuario: `usuario:password` → la clave elegida en texto plano.
 - Descripciones de las 4 comidas base de un día:
   `usuario:fecha:descripciones` → JSON `{ desayuno, almuerzo, merienda, cena }`
 - Índice de comidas extra de un día: `usuario:fecha:extras` → JSON
@@ -211,15 +215,16 @@ estrellas (tocar la misma estrella otra vez borra el puntaje). Reglas:
     comida y un resumen de cumplimiento del rango en la última página. Ver
     la sección "Sistema de puntuación" más arriba para el detalle de las
     reglas.
+18. Autenticación, "Modo Lectura" público y contraseñas. Posibilita separar la app entre dueños de la cuenta con posibilidad para editar la información y el resto (familiares, amigos o la nutricionista) que pueden observar todos los datos al enviarles el link, pero les desaparecen las herramientas de edición.
+19. Panel invisible "admin" para gestionar usuarios, acceder a cuentas y ver listados.
 
 ## Limitaciones conocidas / decisiones tomadas
 
 - Solo se aceptan fotos JPG o PNG (por la librería de generación de PDF).
 - El rango del PDF está limitado a 62 días por generación (para no exceder
   el timeout de las funciones gratuitas de Netlify).
-- El sistema de usuarios NO es una autenticación real — cualquiera que
-  conozca el nombre de usuario puede verlo escribiéndolo en la URL. Sirve
-  para separar datos entre personas de confianza, no para datos sensibles.
+- Cualquier persona que conozca un nombre de usuario válido (`?u=pepe`) podrá visualizar tranquilamente sus datos y fotos, ya que el bloqueo de autenticación radica netamente en la **modificación** y escritura de datos. Además, las contraseñas se almacenan limpias para que sea más fácil recuperarlas manualmente por el administrador sin hashes (seguridad para ámbito familiar, no estricta).
+- Como retrocompatibilidad, todos los usuarios creados antes del sistema de claves asumen que su clave es `123456`, de esta manera los usuarios veteranos no perdieron control sobre su cuenta.
 - No hay todavía una pantalla para eliminar opciones guardadas (presets) de
   comida ni de actividad física desde la interfaz, aunque las funciones del
   servidor (`presets-delete.mjs`, `activity-presets-delete.mjs`) ya existen
