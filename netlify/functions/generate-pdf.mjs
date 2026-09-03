@@ -5,9 +5,9 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FONT_DISPLAY_PATH = path.join(__dirname, "assets", "fonts", "DMSerifDisplay-Regular.ttf");
-const FONT_DISPLAY_ITALIC_PATH = path.join(__dirname, "assets", "fonts", "DMSerifDisplay-Italic.ttf");
+const localDirname = path.dirname(fileURLToPath(import.meta.url));
+const FONT_DISPLAY_PATH = path.join(localDirname, "assets", "fonts", "DMSerifDisplay-Regular.ttf");
+const FONT_DISPLAY_ITALIC_PATH = path.join(localDirname, "assets", "fonts", "DMSerifDisplay-Italic.ttf");
 
 const COMIDAS = [
   { key: "desayuno", label: "Desayuno" },
