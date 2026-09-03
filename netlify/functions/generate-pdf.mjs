@@ -1,5 +1,5 @@
 import { getStore } from "@netlify/blobs";
-import { PDFDocument, StandardFonts, rgb, degrees } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb, degrees, pushGraphicsState, popGraphicsState, moveTo, lineTo, closePath, clip, endPath } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -197,7 +197,7 @@ function rotacionParaOrientacion(orientation) {
   }
 }
 
-// Dibuja una imagen ya rotada/centrada dentro de una caja, sin deformarla.
+// Dibuja una imagen ya rotada/centrada dentro de una caja recortándola (object-fit: cover)
 function dibujarFotoAjustada(page, img, orientation, cellX, cellY, cellW, cellH) {
   const rotDeg = rotacionParaOrientacion(orientation);
   const rawW = img.width;
@@ -207,11 +207,14 @@ function dibujarFotoAjustada(page, img, orientation, cellX, cellY, cellW, cellH)
 
   const boxW = cellW - 10;
   const boxH = cellH - 10;
-  const scale = Math.min(boxW / displayW, boxH / displayH);
+  // math.max scale to fill the entire box length-wise and width-wise
+  const scale = Math.max(boxW / displayW, boxH / displayH);
   const dW = displayW * scale;
   const dH = displayH * scale;
-  const dx = cellX + (cellW - dW) / 2;
-  const dy = cellY + (cellH - dH) / 2;
+
+  // offset centered
+  const dx = cellX + 5 + (boxW - dW) / 2;
+  const dy = cellY + 5 + (boxH - dH) / 2;
 
   const w = rawW * scale;
   const h = rawH * scale;
@@ -233,7 +236,22 @@ function dibujarFotoAjustada(page, img, orientation, cellX, cellY, cellW, cellH)
     drawY = dy;
   }
 
+  // push mask operator (clip rect bounding box)
+  page.pushOperators(
+    pushGraphicsState(),
+    moveTo(cellX + 5, cellY + 5),
+    lineTo(cellX + 5 + boxW, cellY + 5),
+    lineTo(cellX + 5 + boxW, cellY + 5 + boxH),
+    lineTo(cellX + 5, cellY + 5 + boxH),
+    closePath(),
+    clip(),
+    endPath()
+  );
+
   page.drawImage(img, { x: drawX, y: drawY, width: w, height: h, rotate: degrees(pdfRotate) });
+
+  // pop mask operator
+  page.pushOperators(popGraphicsState());
 }
 
 export default async (req) => {
