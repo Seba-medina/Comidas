@@ -44,15 +44,17 @@ export default async (req) => {
 
         // Obtener los blob keys en paralelo
         await Promise.all(results.map(async (r) => {
-            const [metricasData, puntajesData, actividadesData] = await Promise.all([
+            const [metricasData, puntajesData, actividadesData, descData] = await Promise.all([
                 store.get(`${usuario}:${r.fechaStr}:metricas`, { type: "json" }).catch(() => null),
                 store.get(`${usuario}:${r.fechaStr}:puntajes`, { type: "json" }).catch(() => null),
                 store.get(`${usuario}:${r.fechaStr}:actividades`, { type: "json" }).catch(() => null),
+                store.get(`${usuario}:${r.fechaStr}:descripciones`, { type: "json" }).catch(() => null),
             ]);
             r.metricas = metricasData || {};
             r.puntajes = puntajesData || {};
             if (!r.puntajes.extras) r.puntajes.extras = {};
             r.actividades = Array.isArray(actividadesData) ? actividadesData : [];
+            r.descripciones = descData || {};
         }));
 
         // Matrices reducidas para la UI de Chart.js y reportes

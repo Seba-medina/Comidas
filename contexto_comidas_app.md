@@ -19,28 +19,20 @@ acceso directo (PWA).
 
 ## Identidad visual
 
-Estética cálida y hogareña ("libreta de cocina"), consistente entre la app
-web y el PDF:
+Estética moderna y fluida con soporte para *Glassmorphism* (cartas flotantes, interfaces semitransparentes), enfocada fuertemente en dinamismo, animaciones y usabilidad premium:
 
-- **Paleta:** fondo papel/crema, tinta marrón cálido para texto, terracota
-  como color principal. Cada una de las 4 comidas tiene su propio color de
-  acento (mostaza=desayuno, terracota=almuerzo, damasco=merienda,
-  ciruela=cena), y las comidas extra y la actividad física usan verde
-  salvia. Estos mismos colores se repiten en la web (cabecera de cada
-  tarjeta) y en el PDF (cabecera de cada recuadro de comida).
-- **Tipografía en la web:** Fraunces (serif, para títulos y nombres de
-  comida) + Karla (sans, para el resto), cargadas desde Google Fonts.
+- **Paleta y Temas:** Fondo "mesh gradient" envolvente (toques de rojo, naranja, violeta y verde). Soporte completo para **Modo Claro** y **Modo Oscuro** (`dark-mode` con paleta slate `#090D16` / `#161E31`), seleccionable con botón 🌙 / ☀️ en la cabecera y persistente en `localStorage`. Tinta oscura mate para los textos de contraste diurno y blanco suave para el nocturno.
+- **Tipografía en la web:** Outfit (sans-serif redondeada moderna, para títulos numéricos y logos) + Inter (sans neutra legibilísima, para el resto de UI), cargadas vía Google Fonts.
 - **Tipografía en el PDF:** DM Serif Display, incrustada de verdad en el PDF
   (no es una fuente estándar) para los títulos de cada día; el resto del
   texto usa Helvetica (fuente estándar, liviana).
 - **Navegación de acciones:** un botón ☰ en el header abre un menú
-  desplegable con las 4 acciones (Actividad física, Comida extra, Generar
-  PDF, Mi progreso). No hay barra de botones fija ni panel lateral siempre
+  desplegable con las acciones principales (Galería de fotos, Comida extra, Generar
+  PDF, Mi progreso, Métricas y Actividad). No hay barra de botones fija ni panel lateral siempre
   visible — el comportamiento es el mismo en cualquier tamaño de pantalla.
-- **Sistema de puntuación:** cada comida (base y extra) se puntúa del 1 al 5
+- **Sistema de puntuación y resumen:** cada comida (base y extra) se puntúa del 1 al 5
   con estrellas, tanto en la web como reflejado en el PDF (puntitos de
-  colores, ya que las fuentes del PDF no pueden mostrar el símbolo ★). Ver
-  la sección "Sistema de puntuación" más abajo para el detalle completo.
+  colores, ya que las fuentes del PDF no pueden mostrar el símbolo ★). La página principal cuenta además con un banner de progreso del día con checklist interactivo.
 
 ## Stack técnico
 
@@ -146,9 +138,7 @@ estrellas (tocar la misma estrella otra vez borra el puntaje). Reglas:
   hace avanzar — solo un día amarillo o rojo la corta. El cálculo tiene un
   tope de 120 días hacia atrás (`MAX_DIAS_RACHA` en `progreso.mjs`) para no
   escanear indefinidamente; si se llega al tope, la web muestra "120+".
-- **Calendario:** panel "🏆 Mi progreso" (en el menú ☰) con la racha arriba
-  y un calendario del mes con cada día coloreado según su estado, más
-  flechas para navegar entre meses.
+- **Racha y Calendario Web:** La racha y el calendario mensual tipo mapa de calor ahora están incrustados directamente dentro de la **página principal** ("🏆 Progreso"), mientras que el botón "Estadísticas Avanzadas" en el menú ☰ abre gráficas complejas en un modal.
 - **En el PDF:** cada comida muestra 5 puntitos (llenos hasta el puntaje) en
   vez de estrellas de texto — las fuentes usadas en el PDF no tienen el
   glyph ★, así que se dibujan como círculos con `page.drawCircle`. La página
@@ -191,9 +181,7 @@ estrellas (tocar la misma estrella otra vez borra el puntaje). Reglas:
     app dentro del menú de acciones y en el PDF (línea debajo del título del
     día, más una página de resumen al final con el conteo de cada actividad
     en todo el rango de fechas del PDF).
-13. Rediseño visual completo de la app (paleta cálida "libreta de cocina",
-    tipografía Fraunces+Karla, tarjetas de comida con color propio por tipo,
-    ícono de la app rediseñado, manifest actualizado).
+13. Rediseño visual "Modern Premium": migración total desde el diseño 2009 "rústico" hacia un esquema con mesh gradients dinámicos en CSS, glassmorphism con soft-shadows en tarjetas hiper-redondeadas (20px), microanimaciones, y tipografías corporativas (Outfit / Inter).
 14. Menú de acciones como botón hamburguesa (☰) en el header, con un
     desplegable que reemplazó tanto la barra de botones fija de mobile como
     el panel lateral siempre visible de pantallas anchas — comportamiento
@@ -211,9 +199,7 @@ estrellas (tocar la misma estrella otra vez borra el puntaje). Reglas:
     alternadas). Si el archivo de fuente no estuviera disponible en
     producción por algún motivo, el código cae automáticamente a una fuente
     estándar en vez de romper la generación del PDF.
-17. Sistema de puntuación (1-5 estrellas) por comida, con racha de días
-    "verdes" consecutivos y un calendario mensual tipo mapa de calor
-    (panel "🏆 Mi progreso" en el menú ☰). El mismo criterio de estado del
+17. Sistema de puntuación (1-5 estrellas) por comida. El calendario de rachas fue extraído y puesto estáticamente en la pantalla inicial, mientras que el menú ☰ cuenta con su propio panel para reportes estadísticos avanzados (integración Chart.js).
     día (verde/amarillo/rojo/gris) se usa también en el PDF: puntitos por
     comida y un resumen de cumplimiento del rango en la última página. Ver
     la sección "Sistema de puntuación" más arriba para el detalle de las
@@ -224,6 +210,15 @@ estrellas (tocar la misma estrella otra vez borra el puntaje). Reglas:
     - **Fetch en Paralelo:** Uso de `Promise.all` para descargar imágenes agrupadamente. Antes, con un bucle secuencial, generar muchos días hacía que se superaran los 10 segundos gratuitos de AWS Lambda en Netlify, provocando caídas opacas como `unexpected end of JSON input`.
     - **Manejo de errores seguro (Try/Catch global):** Todo el endpoint de generación procesado en bloques seguros que devuelven JSON amigable, y eliminación de la variable `__dirname` nativa por colisión e inyecciones de los propios bundlers de esbuild/Netlify.
     - **Estética fotográfica:** Implementación algorítmica y calculada para imitar **object-fit: cover**, encuadrando mediante el uso de operadores avanzados de clipping mask de `pdf-lib` la imagen, logrando el mismo formato cuadrado profesional en base a cualquier foto original (vertical o apaisada).
+21. **Rediseño de Cabecera y Barra de Usuario Unificada:** Cabecera con marca, usuario activo, botón de alternancia de tema 🌙 / ☀️, accesos para contraseña, compartir link, salir y menú desplegable en una sola fila refinada y responsiva.
+22. **Separación de Actividad Física con Modal Dedicado:** La tarjeta de actividad física en la vista principal muestra exclusivamente las actividades del día con contador y botón `＋ Agregar`, abriendo un modal estilizado para cargar tipo y notas o guardar opciones reutilizables.
+23. **Panel de Progreso y Estadísticas Rediseñado:** Gráficos nativos vectoriales SVG (líneas y barras con tooltips) de peso, sueño y energía, sin dependencias externas frágiles, junto con tarjetas KPI de resumen y desglose de estrellas por comida.
+24. **Navegación Rápida con Botón "Hoy" e Indicador Relativo:** Indicador del día respecto a la fecha actual (`Hoy`, `Ayer`, `Mañana`, `Hace X días`) y botón interactivo `📅 Volver a Hoy` que aparece cuando se exploran fechas pasadas o futuras para regresar al día de hoy en un solo clic.
+25. **Banner de Resumen y Checklist Diario de Comidas:** Widget superior con barra de progreso porcentual (`0/4` a `4/4`), estado de cada comida (Desayuno, Almuerzo, Merienda, Cena) con checks interactivos que hacen scroll al plato correspondiente, cálculo de calificación promedio de estrellas y celebración al completar el día.
+26. **Sistema de Registro y Acceso por Pestañas (Iniciar Sesión / Registrarme):** Pantalla de ingreso renovada con selector de pestañas que separa nítidamente el inicio de sesión y la creación de una cuenta nueva. El formulario de registro incluye campo de usuario (validación de formato 3-30 caracteres alfanuméricos), creación de contraseña, confirmación de contraseña repetida, validaciones en tiempo real y soporte en el backend (`/api/auth-login` con `modo: "register"`) para evitar colisiones con cuentas existentes.
+27. **Compartir Resumen del Día por WhatsApp:** Generador de texto estructurado con emojis y formato Markdown de WhatsApp (comidas, ingredientes, estrellas, actividades y biométricos) con botón de envío directo a WhatsApp o copia rápida al portapapeles con toast. (Nota: el tracker de agua fue retirado de la interfaz y del resumen para simplificar el flujo visual).
+28. **Modo Oscuro Integrado:** Alternador 🌙 / ☀️ en la cabecera, con paleta oscura slate contrastada (`#090D16`, `#161E31`) y sombras profundas, con persistencia automática en el navegador (`localStorage`) y respeto a las preferencias del sistema.
+29. **Galería Visual de Platos (Foto-feed 📸):** Modal con visualización en cuadrícula de fotos recientes, filtros por tipo de comida (Desayuno, Almuerzo, Merienda, Cena, Extras), visualización en lightbox y botón de salto instantáneo para viajar a la fecha de cualquier foto.
 
 ## Limitaciones conocidas / decisiones tomadas
 

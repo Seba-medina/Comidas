@@ -39,9 +39,9 @@ export default async (req) => {
         const metricas = {
             peso: typeof body.peso === "number" ? body.peso : null,
             sueno: typeof body.sueno === "number" ? body.sueno : null,
-            agua: typeof body.agua === "number" ? body.agua : null,
             energia: typeof body.energia === "number" ? body.energia : null,
-            pasos: typeof body.pasos === "number" ? body.pasos : null
+            pasos: typeof body.pasos === "number" ? body.pasos : null,
+            agua: typeof body.agua === "number" ? body.agua : null
         };
 
         const store = getStore("comidas");

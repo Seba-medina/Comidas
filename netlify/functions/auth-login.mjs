@@ -8,13 +8,13 @@ export default async (req) => {
   }
 
   try {
-    const { usuario, password } = await req.json();
+    const { usuario, password, modo } = await req.json();
 
     if (!usuario || typeof usuario !== "string") {
-      return new Response(JSON.stringify({ error: "Usuario requerido" }), { status: 400 });
+      return new Response(JSON.stringify({ error: "Ingresá un nombre de usuario" }), { status: 400 });
     }
     if (!password || typeof password !== "string") {
-      return new Response(JSON.stringify({ error: "Contraseña requerida" }), { status: 400 });
+      return new Response(JSON.stringify({ error: "Ingresá una contraseña" }), { status: 400 });
     }
 
     if (usuario === "admin") {
@@ -32,12 +32,37 @@ export default async (req) => {
     }
 
     if (!USUARIO_REGEX.test(usuario)) {
-      return new Response(JSON.stringify({ error: "Usuario inválido" }), { status: 400 });
+      return new Response(JSON.stringify({ error: "El usuario debe tener entre 3 y 30 caracteres (letras, números, guión o guión bajo)" }), { status: 400 });
     }
 
     const store = getStore("comidas");
     const pwdBlob = await store.get(`${usuario}:password`);
 
+    // --- Caso: Modo Registro Explícito ---
+    if (modo === "register") {
+      if (pwdBlob !== null) {
+        return new Response(JSON.stringify({ error: "El usuario ya existe. Si te pertenece, iniciá sesión." }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      const items = await store.list({ prefix: `${usuario}:` });
+      if (items.blobs.length > 0) {
+        return new Response(JSON.stringify({ error: "El usuario ya existe. Por favor iniciá sesión." }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      // Crear nuevo usuario
+      await store.set(`${usuario}:password`, password);
+      return new Response(JSON.stringify({ ok: true, isNew: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // --- Caso: Modo Login Explícito o Automático ---
     if (pwdBlob !== null) {
       if (pwdBlob === password) {
         return new Response(JSON.stringify({ ok: true }), {
@@ -52,7 +77,7 @@ export default async (req) => {
       }
     }
 
-    // Usuario no tiene password. Veamos si tiene datos antiguos.
+    // Usuario no tiene password aún. Veamos si tiene datos antiguos.
     const items = await store.list({ prefix: `${usuario}:` });
     if (items.blobs.length > 0) {
       // Usuario antiguo
@@ -69,7 +94,15 @@ export default async (req) => {
         });
       }
     } else {
-      // Usuario nuevo
+      // Si vino en modo login y no existe, avisar amigablemente
+      if (modo === "login") {
+        return new Response(JSON.stringify({ error: "Usuario no encontrado. Podés crearlo en la pestaña 'Registrarme'." }), {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      // Compatibilidad fallback
       await store.set(`${usuario}:password`, password);
       return new Response(JSON.stringify({ ok: true, isNew: true }), {
         status: 200,
